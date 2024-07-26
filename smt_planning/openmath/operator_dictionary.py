@@ -9,6 +9,9 @@ class OperatorDictionary:
 		"!=": "http://www.openmath.org/cd/relation1#neq",
 		"<=": "http://www.openmath.org/cd/relation1#leq",
 		">=": "http://www.openmath.org/cd/relation1#geq", 
+		#Logic relations
+		"and": "http://www.openmath.org/cd/logic1#and",
+		"or": "http://www.openmath.org/cd/logic1#or",
 		# Arithmetic operators
 		"+": "http://www.openmath.org/cd/arith1#plus",
 		"-": "http://www.openmath.org/cd/arith1#minus",
@@ -31,6 +34,9 @@ class OperatorDictionary:
 		"http://www.openmath.org/cd/relation1#neq": MathSymbolInformation("!=", 2),
 		"http://www.openmath.org/cd/relation1#leq": MathSymbolInformation("<=",2),
 		"http://www.openmath.org/cd/relation1#geq": MathSymbolInformation(">=", 2),
+		#Logic relations
+		"http://www.openmath.org/cd/logic1#and": MathSymbolInformation("and", 2),
+		"http://www.openmath.org/cd/logic1#or": MathSymbolInformation("or", 2),
 		# Arithmetic operators
 		"http://www.openmath.org/cd/arith1#plus": MathSymbolInformation("+", 2),
 		"http://www.openmath.org/cd/arith1#minus": MathSymbolInformation("-", 2),
