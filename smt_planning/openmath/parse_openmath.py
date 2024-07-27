@@ -1,11 +1,19 @@
 from rdflib import Variable
 from rdflib.term import Identifier
-from typing import Mapping, Callable, MutableSequence
+from typing import List, Dict, Mapping, Callable, MutableSequence
+from rdflib import URIRef
+from collections import defaultdict
 from smt_planning.openmath.math_symbol_information import MathSymbolInformation
 from smt_planning.openmath.operator_dictionary import OperatorDictionary
+from smt_planning.openmath.application import Application
 
+# Define some helper Variables to get binding values
 APPLICATION = Variable("application")
 ARG = Variable("arg")
+OPERATOR = Variable("operator")
+ARGNAME = Variable("argName")
+ARGTYPE = Variable("argType")
+ARGVALUE = Variable("argValue")
 
 def from_open_math_in_graph( query_handler, rootApplicationIri: str, happening: int, event: int) -> str:
 	# Converts OpenMath contained in a Graph into a textual, human-readable formula
@@ -22,13 +30,14 @@ def from_open_math_in_graph( query_handler, rootApplicationIri: str, happening: 
 	PREFIX DINEN61360: <http://www.w3id.org/hsu-aut/DINEN61360#>
 	PREFIX CaSk: <http://www.w3id.org/hsu-aut/cask#>
 	SELECT ?application (count(?argumentList)-1 as ?position) ?operator (COALESCE(?argDE, ?arg) AS ?argName) ?argType ?arg WHERE {
-		?application a OM:Application, CSS:CapabilityConstraint.
+		#?application a OM:Application, CSS:CapabilityConstraint.
 		?application OM:arguments/rdf:rest* ?argumentList;
 										OM:operator ?operator.
 
 		?argumentList rdf:rest*/rdf:first ?arg.
 		?arg a ?argType.
-		?argType rdfs:subClassOf OM:Object.
+		#?argType rdfs:subClassOf OM:Object.
+		FILTER(STRSTARTS(STR(?argType), "http://openmath.org"))
 		OPTIONAL {
 			#?arg OM:name ?argName.
 			?argDE DINEN61360:has_Instance_Description ?arg.
@@ -41,13 +50,13 @@ def from_open_math_in_graph( query_handler, rootApplicationIri: str, happening: 
 	queryResults = QueryCache.query(query_handler, queryString)
 	
 	# Get root application to start the whole recursive parsing procedure
-	rootApplication = getRootApplication(queryResults.bindings, rootApplicationIri)
-	string = getArgumentsOfApplication(rootApplication, queryResults.bindings, happening, event)
+	rootApplication = get_root_application(queryResults.bindings, rootApplicationIri)
+	string = get_arguments_of_application(rootApplication, queryResults.bindings, happening, event)
 	
 	return string
 
 
-def createExpression(operator:MathSymbolInformation, argumentExpression: list[str] | str, happening: int, event: int):
+def create_expression(operator:MathSymbolInformation, argumentExpression: list[str] | str, happening: int, event: int):
 	# Creates a string expression for a given operator and arguments. Handles unary and binary functions 
 	arity = operator.arity
 	operatorSymbol = f" {operator.symbol} "
@@ -71,7 +80,41 @@ def matches_Iri_and_has_no_higher_parent(bindings: MutableSequence[Mapping[Varia
 			yield binding
 
 
-def getRootApplication(bindings: MutableSequence[Mapping[Variable, Identifier]], rootApplicationIri: str)-> Mapping[Variable, Identifier]:
+def group_by(bindings: List[Mapping[Variable, Identifier]], key_fn) -> Mapping[str, List[Mapping[str, Identifier]]]:
+    grouped = defaultdict(list)
+    for binding in bindings:
+        key = key_fn(binding)
+        grouped[key].append(binding)
+    return grouped
+
+
+def convert_bindings_to_applications(bindings: List[Mapping[Variable, Identifier]]) -> List[Application]:
+    if len(bindings) == 0:
+        return []
+
+    # Gruppiere die Bindungen nach der 'application'-Variable
+    grouped_bindings = group_by(bindings, lambda binding: str(binding.get('application')))
+
+    # Erzeuge Application-Objekte aus den Gruppierungen
+    applications = []
+    for group_key, group in grouped_bindings.items():
+        first_entry = group[0]
+        args = [entry.get('arg') for entry in group]
+
+        application = Application(
+            first_entry.get('context'),
+            first_entry.get('application'),
+            first_entry.get('position'),
+            first_entry.get('operator'),
+            first_entry.get('argName'),
+            first_entry.get('argValue')
+        )
+        application.args = args
+        applications.append(application)
+
+    return applications
+
+def get_root_application(bindings: MutableSequence[Mapping[Variable, Identifier]], rootApplicationIri: str)-> Application:
 	# Finds the root application element by searching for rootApplicationIri and making sure it is in fact a root application element.
 
 	# Due to the query structure, finding the parent element is a bit tricky. To understand this def, it's best to execute the query separately and look at the results 
@@ -84,46 +127,46 @@ def getRootApplication(bindings: MutableSequence[Mapping[Variable, Identifier]],
 	# We can then still have multiple rows within the bindings if the root application is a binary relation (e.g. for "y=x+z" and x=y).
 	# If there are no sub applications, any line can be returend. If there is a sub application, this one must be returned
 	ARGTYPE = Variable("argType")
-	isApplication: Callable[[Mapping[Variable, Identifier]], bool] = lambda binding: str(binding.get(ARGTYPE)) == "http:#openmath.org/vocab/math#Application"
-	parentWithSubApplication = list(filter(isApplication, rootCandidates))
+	isApplication: Callable[[Mapping[Variable, Identifier]], bool] = lambda binding: str(binding.get(ARGTYPE)) == "http://openmath.org/vocab/math#Application"
+	rootBindings = list(filter(isApplication, rootCandidates))
 
-	if (len(parentWithSubApplication) > 0):
-		# If there is a parent with a sub application, return this one
-		rootApplication = parentWithSubApplication[0]
-	else: 
-		# If not, simply return the first one. It doesn't matter as in later stages, all information will be retrieved
-		rootApplication =  rootCandidates[0]
-	
-	# if (!rootApplication) throw new Error(`Error while finding root application with IRI ${rootApplicationIri}`)
+	rootApplications = convert_bindings_to_applications(rootBindings)
 
-	return rootApplication
+	return rootApplications[0]
 
-def getArgumentsOfApplication(parentApplication: Mapping[Variable, Identifier], bindings: MutableSequence[Mapping[Variable, Identifier]], happening: int, event: int)-> str:
+def get_arguments_of_application(parent_application: Application, bindings: MutableSequence[Mapping[Variable, Identifier]], happening: int, event: int)-> str:
 	# Check if there are more entries with arguments under the current element's application. This is the case for non-nested terms like x+y+z...
-	filterSameApplications: Callable[[Mapping[Variable, Identifier]], bool] = lambda binding :binding.get(APPLICATION) == parentApplication.get(APPLICATION)
+	filterSameApplications: Callable[[Mapping[Variable, Identifier]], bool] = lambda binding :binding.get(APPLICATION) == parent_application.application
 	argumentEntries = list(filter(filterSameApplications, bindings))
 	
 	# Check if the entry has children. If it has, we need to recursively go deeper
+	child_bindings = []
+    
+    # Durchlaufe alle Argumente des Parent Application
+	for parent_arg in parent_application.args:
+		# Finde alle Bindungen, die auf das aktuelle Parent Argument verweisen
+		child_binding = list(filter(lambda binding: binding.get(APPLICATION) == parent_arg, bindings))
+		child_bindings.extend(child_binding)
+	
+	child_applications = convert_bindings_to_applications(child_bindings)
 
-	hasChildren: Callable[[Mapping[Variable, Identifier]], bool] = lambda binding: binding.get(APPLICATION) == parentApplication.get(ARG)
-	childApplications = list(filter(hasChildren, bindings))
-
-
-	OPERATOR = Variable("operator")
-	ARGNAME = Variable("argName")
-
-	if (len(childApplications) > 0):
-		entry = childApplications[0]
+	if (len(child_applications) > 0):
 		openMathOperator = str(argumentEntries[0].get(OPERATOR))
 		operator = OperatorDictionary.getMathJsSymbol(openMathOperator)
-
 		argumentNames = list()
 		for entry in argumentEntries:
-			if entry.get(ARGNAME):
+			argType = str(entry.get(ARGTYPE))
+			if argType == 'http://openmath.org/vocab/math#Variable':
 				argumentNames.append(str(entry.get(ARGNAME)))
+			elif argType == 'http://openmath.org/vocab/math#Literal':
+				argumentNames.append(str(entry.get(ARGVALUE)))
 		
-		applicationArguments = getArgumentsOfApplication(entry, bindings, happening, event)
-		string = createExpression(operator, [*argumentNames, applicationArguments], happening, event)
+		argumentsOfChildApplications = list()
+		for childApp in child_applications:
+			argumentsFormula = get_arguments_of_application(childApp, bindings, happening, event)
+			argumentsOfChildApplications.append(argumentsFormula)
+		
+		string = create_expression(operator, [*argumentNames, *argumentsOfChildApplications], happening, event)
 	else:
 		allSameOperator = all(entry.get(OPERATOR) == argumentEntries[0].get(OPERATOR) for entry in argumentEntries)
 		
@@ -138,7 +181,7 @@ def getArgumentsOfApplication(parentApplication: Mapping[Variable, Identifier], 
 		getArgNames: Callable[[Mapping[Variable, Identifier]], str] = lambda binding: str(binding.get(ARGNAME))
 		argumentNames = list(map(getArgNames, argumentEntries))
 		
-		string = createExpression(operator, argumentNames, happening, event)
+		string = create_expression(operator, argumentNames, happening, event)
 	
 	return string
 
