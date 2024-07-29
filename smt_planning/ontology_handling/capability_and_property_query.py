@@ -164,7 +164,7 @@ def get_output_influences_of_capability(capability_iri: str) -> List[CapabilityP
 		# capDict.add_CapabilityOccurrence(str(row['cap']), "http://www.w3id.org/hsu-aut/cask#ProvidedCapability", happening, [], [])
 		property_iri = str(row['output_de'])
 		prop = property_dictionary.get_property(property_iri)
-		if(not row.get('equalConstraint') and not row.get('outputValue') and not row.get('inputValue') and not row.get('resourceConstraint')):
+		if(not row.get('equalConstraint') and not row.get('outputValue') and not row.get('resourceConstraint')):
 			continue
 		if(row.get('resourceConstraint')):
 			# Output is set to a resource by a constraint. This is a property change even if there is no constraint between input and output
