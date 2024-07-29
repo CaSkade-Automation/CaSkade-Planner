@@ -84,9 +84,9 @@ def find_capability_pairs() -> List[CapabilityPair]:
 	for binding in result.bindings:
 		related_bindings = list(filter(lambda x: is_related_capability_binding(binding, x), result.bindings))
 		for related_binding in related_bindings:
-			capability_a = capability_dictionary.get_capability(str(binding.get("cap")))
-			capability_b = capability_dictionary.get_capability(str(related_binding.get("cap")))
-			property = property_dictionary.get_property(str(binding.get("de")))
+			capability_a = capability_dictionary.get_capability(str(binding.get(Variable("cap"))))
+			capability_b = capability_dictionary.get_capability(str(related_binding.get(Variable("cap"))))
+			property = property_dictionary.get_property(str(binding.get(Variable("de"))))
 			pair = CapabilityPair(capability_a, capability_b, property)
 			existing_pair = next(filter(lambda x: is_existing_cap(pair, x), related_capability_pairs), None)
 			# TODO: do we need to check for same pair here as well?
