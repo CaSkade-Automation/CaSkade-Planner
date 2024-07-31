@@ -24,9 +24,9 @@ class PropertyPairCache:
 	property_pairs: List[PropertyPair] = list()
 
 	@staticmethod
-	def get_property_pairs():
+	def get_property_pairs(required_capability_iri: str):
 		if not PropertyPairCache.property_pairs:
-			PropertyPairCache.property_pairs = find_property_pairs()			
+			PropertyPairCache.property_pairs = find_property_pairs(required_capability_iri)			
 
 		return PropertyPairCache.property_pairs
 
@@ -35,11 +35,11 @@ class PropertyPairCache:
 		PropertyPairCache.property_pairs = None
 
 
-def get_property_cross_relations(happenings: int, event_bound: int) -> List[BoolRef]:
+def get_property_cross_relations(happenings: int, event_bound: int, required_capability_iri: str) -> List[BoolRef]:
 	
 	graph = StateHandler().get_graph()
 	property_dictionary = StateHandler().get_property_dictionary()
-	related_property_pairs = PropertyPairCache.get_property_pairs()
+	related_property_pairs = PropertyPairCache.get_property_pairs(required_capability_iri)
 	
 	relation_constraints = []
 
@@ -84,10 +84,10 @@ def get_property_cross_relations(happenings: int, event_bound: int) -> List[Bool
 
 	return relation_constraints
 
-def get_related_properties(property_iri:str) -> List[Property]:
+def get_related_properties(property_iri:str, required_capability_iri) -> List[Property]:
 
 	property_dictionary = StateHandler().get_property_dictionary()
-	property_pairs = PropertyPairCache.get_property_pairs()
+	property_pairs = PropertyPairCache.get_property_pairs(required_capability_iri)
 	result_related_properties: List[Property] = []
 
 	# Find all related partners of the given property
@@ -131,7 +131,7 @@ def is_self_pair(pair: PropertyPair) -> bool:
 	return str(pair.property_a.iri) == str(pair.property_b.iri)
 
 
-def find_property_pairs() -> List[PropertyPair]: 
+def find_property_pairs(required_cap_iri: str) -> List[PropertyPair]: 
 	# Queries the graph and finds all implicitly related property pairs
 
 	query_string = """
@@ -144,11 +144,13 @@ def find_property_pairs() -> List[PropertyPair]:
 		?cap a ?capType;
 			^CSS:requiresCapability ?process.
 		values ?capType { CaSk:ProvidedCapability CaSk:RequiredCapability }.
+		# Filter to get only provided caps AND the one required that we are planning for
+		FILTER(?capType = CaSk:ProvidedCapability || ?cap = <{required_cap_iri}>)
 		?process VDI3682:hasInput|VDI3682:hasOutput ?inOut.
 		?de a DINEN61360:Data_Element.
 		?de DINEN61360:has_Type_Description ?td;
 			DINEN61360:has_Instance_Description ?id.
-		?inOut VDI3682:isCharacterizedBy ?id.
+		?inOut DINEN61360:has_Data_Element ?de.
 		BIND(VDI3682:Product AS ?inOutType)
 		?inOut a ?inOutType.
 		OPTIONAL {
@@ -157,6 +159,7 @@ def find_property_pairs() -> List[PropertyPair]:
 		}
 	}
 	"""
+	query_string = query_string.replace('{required_cap_iri}', required_cap_iri)
 	query_handler = StateHandler().get_query_handler()
 	result = query_handler.query(query_string)
 	# Creates a list of pairs of related properties, i.e. a properties with a different data_element that is still implicitly connected and thus must be linked in SMT

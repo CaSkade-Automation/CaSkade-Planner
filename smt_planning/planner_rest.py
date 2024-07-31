@@ -22,7 +22,7 @@ def allowed_file(filename: str) -> bool:
 			filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def setup_planner_with_file(files: ImmutableMultiDict[str, FileStorage]) -> CaskadePlanner | tuple[Response, int]:
+def setup_planner_with_file(files: ImmutableMultiDict[str, FileStorage], required_capability_iri: str) -> CaskadePlanner | tuple[Response, int]:
 	if 'ontology-file' not in files:
 		return jsonify({'error': 'No file part'}), 400
 	
@@ -37,7 +37,7 @@ def setup_planner_with_file(files: ImmutableMultiDict[str, FileStorage]) -> Cask
 		filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 		file.save(filename)
 
-		planner = CaskadePlanner()
+		planner = CaskadePlanner(required_capability_iri)
 		planner.with_file_query_handler(filename)
 		return planner
 	else: 
@@ -51,19 +51,26 @@ def ping():
 # Wait for POST requests with a query param ?mode to /plan
 @app.post('/plan') # type: ignore
 def generate_and_solve_plan():
-	mode = request.args.get('mode')
+	if (not request.is_json):
+		return jsonify({"message": "Request must be JSON"}), 400
 	
+	# Get JSON request body
+	data = request.get_json()
+	mode = data.get('mode')
+	required_capability_iri = data.get('requiredCapabilityIri')
+
 	if mode == 'file':
-		planner = setup_planner_with_file(request.files) # type: ignore
+		planner = setup_planner_with_file(request.files, required_capability_iri) # type: ignore
 		# If the planner is a tuple, it contains an error response
 		if isinstance(planner, tuple):
 			return planner
 		
 	elif mode == 'sparql-endpoint':
-		endpoint_url = request.args.get('endpoint-url')
+		endpoint_url = data.get('endpointUrl')
+		
 		if not endpoint_url:
 			return jsonify({'error': 'No endpoint-url provided'}), 400
-		planner = CaskadePlanner()
+		planner = CaskadePlanner(required_capability_iri)
 		planner.with_endpoint_query_handler(endpoint_url)
 
 	max_happenings = request.args.get('max-happenings',type=int)

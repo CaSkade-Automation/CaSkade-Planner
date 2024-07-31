@@ -4,7 +4,7 @@ from z3 import Implies, Not, BoolRef, ArithRef
 from smt_planning.smt.StateHandler import StateHandler
 from smt_planning.smt.property_links import get_related_properties
 
-def capability_effects_smt(happenings: int, event_bound: int) -> List[BoolRef]:
+def capability_effects_smt(happenings: int, event_bound: int, required_capability_iri: str) -> List[BoolRef]:
 	property_dictionary = StateHandler().get_property_dictionary()
 	capability_dictionary = StateHandler().get_capability_dictionary()
 	effects_smt = []
@@ -22,7 +22,7 @@ def capability_effects_smt(happenings: int, event_bound: int) -> List[BoolRef]:
 			else: 
 				# TODO: Constraint effect currently in capability_constraints. Needs to be changed  
 				pass
-			related_properties = get_related_properties(property_iri)
+			related_properties = get_related_properties(property_iri, required_capability_iri)
 			for related_property in related_properties:
 				property = property_dictionary.get_property_occurence(related_property.iri, happening, 1)
 				effect_smt = Implies(current_capability, effect_property == property.z3_variable)
