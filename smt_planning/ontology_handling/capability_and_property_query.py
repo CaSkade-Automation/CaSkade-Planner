@@ -5,30 +5,51 @@ from smt_planning.dicts.PropertyDictionary import PropertyDictionary, Capability
 from smt_planning.dicts.CapabilityDictionary import CapabilityDictionary, CapabilityPropertyInfluence, PropertyChange
 from smt_planning.dicts.ResourceDictionary import ResourceDictionary
 
-def get_all_properties() -> PropertyDictionary:
+def get_all_properties(required_cap_iri: str) -> PropertyDictionary:
 	
 	# Names need to be a combination of the thing that has a property (ID) with the corresponding type description. 
 	# Thing and type description together define a certain property in a context.
-	# rdflib is not capable of inferencing 
+	# And we need to get properties that belong to the capabilitiy inputs / outputs themselves as well as to resources, hence the UNION.
+	# 
 	query_string = """
 	PREFIX DINEN61360: <http://www.w3id.org/hsu-aut/DINEN61360#>
 	PREFIX CSS: <http://www.w3id.org/hsu-aut/css#>
 	PREFIX CaSk: <http://www.w3id.org/hsu-aut/cask#>
 	PREFIX VDI3682: <http://www.w3id.org/hsu-aut/VDI3682#>
 	PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-	SELECT ?de (GROUP_CONCAT(?cap; SEPARATOR=",") AS ?caps) ?capType ?dataType ?relationType ?expr_goal ?log ?val WHERE { 
+	SELECT ?de (GROUP_CONCAT(?cap; SEPARATOR=",") AS ?caps) ?capType ?dataType ?relationType ?expr_goal ?log ?val WHERE {
+		{
+			# this part gets all the data elements of resources (that must provide a cap)
+			?resource CSS:providesCapability ?cap.
+			BIND(CaSk:ProvidedCapability as ?capType).
+			?cap a ?capType.
+			?resource DINEN61360:has_Data_Element ?de.
+		}
+		UNION 
+		{
+			# this part gets all properties that are directly connected to a process / capability
+			?process ?relation ?inout.
+			VALUES ?relation {
+				VDI3682:hasInput VDI3682:hasOutput
+			}.
+			BIND(STRAFTER(STR(?relation), "has") AS ?relationType)
+			?inout VDI3682:isCharacterizedBy ?id.
+		}
+		# All caps must have a type, that can either be provided or required (but if required, filter for the one we're plannning for)
 		?cap a ?capType;
 			^CSS:requiresCapability ?process.
-		values ?capType { CaSk:ProvidedCapability CaSk:RequiredCapability }. 	
-		?process ?relation ?inout.
-		VALUES ?relation {VDI3682:hasInput VDI3682:hasOutput}.
-		?inout VDI3682:isCharacterizedBy ?id.
+		values ?capType {
+			CaSk:ProvidedCapability CaSk:RequiredCapability 
+		}.
+		# Filter to get only provided caps AND the one required that we are planning for
+		FILTER(?capType = CaSk:ProvidedCapability || ?cap = <{required_cap_iri}>)
+		# All DE need ID with datatype, exp goal (optional), log (optional), value (optional)
 		?de DINEN61360:has_Instance_Description ?id.
 		?id a ?dataType.
 		?dataType rdfs:subClassOf DINEN61360:Simple_Data_Type.
-		BIND(STRAFTER(STR(?relation), "has") AS ?relationType)
+		FILTER(?dataType != DINEN61360:Simple_Data_Type) # Only get the real subclasses, not Simple_D_T itself
 		OPTIONAL {
-			?id DINEN61360:Expression_Goal ?expr_goal. 
+			?id DINEN61360:Expression_Goal ?expr_goal.
 		}
 		OPTIONAL {
 			?id DINEN61360:Logic_Interpretation ?log .
@@ -36,9 +57,9 @@ def get_all_properties() -> PropertyDictionary:
 		OPTIONAL {
 			?id DINEN61360:Value ?val.
 		}  
-	
-	} GROUP BY ?de ?capType ?dataType ?relationType ?expr_goal ?log ?val
+	} GROUP BY ?de ?capType ?dataType ?relationType ?expr_goal ?log ?val ?resource
 	"""
+	query_string = query_string.replace('{required_cap_iri}', required_cap_iri)
 	query_handler = StateHandler().get_query_handler()
 	results = query_handler.query(query_string)
 	
