@@ -29,11 +29,6 @@ def get_all_properties(required_cap_iri: str) -> PropertyDictionary:
 		{
 			# this part gets all properties that are directly connected to a process / capability
 			?process ?relation ?inout.
-			VALUES ?relation {
-				VDI3682:hasInput VDI3682:hasOutput
-			}.
-			BIND(STRAFTER(STR(?relation), "has") AS ?relationType)
-			?inout VDI3682:isCharacterizedBy ?id.
 		}
 		# All caps must have a type, that can either be provided or required (but if required, filter for the one we're plannning for)
 		?cap a ?capType;
@@ -41,6 +36,11 @@ def get_all_properties(required_cap_iri: str) -> PropertyDictionary:
 		values ?capType {
 			CaSk:ProvidedCapability CaSk:RequiredCapability 
 		}.
+		VALUES ?relation {
+				VDI3682:hasInput VDI3682:hasOutput
+		}.
+		BIND(STRAFTER(STR(?relation), "has") AS ?relationType)
+		?inout VDI3682:isCharacterizedBy ?id.
 		# Filter to get only provided caps AND the one required that we are planning for
 		FILTER(?capType = CaSk:ProvidedCapability || ?cap = <{required_cap_iri}>)
 		# All DE need ID with datatype, exp goal (optional), log (optional), value (optional)
@@ -57,7 +57,7 @@ def get_all_properties(required_cap_iri: str) -> PropertyDictionary:
 		OPTIONAL {
 			?id DINEN61360:Value ?val.
 		}  
-	} GROUP BY ?de ?capType ?dataType ?relationType ?expr_goal ?log ?val ?resource
+	} GROUP BY ?de ?capType ?dataType ?relationType ?expr_goal ?log ?val
 	"""
 	query_string = query_string.replace('{required_cap_iri}', required_cap_iri)
 	query_handler = StateHandler().get_query_handler()
