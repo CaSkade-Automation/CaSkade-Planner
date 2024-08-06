@@ -31,6 +31,7 @@ def infix_to_prefix(infix_expression):
 			' or ': 0,
 			' and ': 1,
 			' = ': 2,
+			' distinct ': 2,
 			' + ': 3,
 			' - ': 3,
 			' * ': 4,

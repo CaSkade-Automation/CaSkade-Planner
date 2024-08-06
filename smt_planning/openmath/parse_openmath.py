@@ -3,6 +3,7 @@ from rdflib.term import Identifier
 from typing import List, Dict, Mapping, Callable, MutableSequence
 from rdflib import URIRef
 from collections import defaultdict
+from smt_planning.smt.StateHandler import StateHandler
 from smt_planning.openmath.math_symbol_information import MathSymbolInformation
 from smt_planning.openmath.operator_dictionary import OperatorDictionary
 from smt_planning.openmath.application import Application
@@ -69,7 +70,14 @@ def create_expression(operator:MathSymbolInformation, argumentExpression: list[s
 	if (arity == 2):
 		# Binary operators are constructed by concatenating operator and arguments, e.g. x + y + z...
 		if pad:
-			padded_expression = [f"|{elem}_{happening}_{event}|" for elem in argumentExpression]
+			property_dictionary = StateHandler().get_property_dictionary()
+			padded_expression = []
+			for elem in argumentExpression:
+				relation_type = property_dictionary.get_property_relation_type(elem)
+				if relation_type == "Input":
+					padded_expression.append(f"|{elem}_{happening}_0|")
+				else:
+					padded_expression.append(f"|{elem}_{happening}_1|")
 		else: 
 			padded_expression = [f"{elem}" for elem in argumentExpression]
 		expression = operatorSymbol.join(padded_expression)
@@ -156,7 +164,7 @@ def get_arguments_of_application(parent_application: Application, bindings: Muta
 
 	if (len(child_applications) > 0):
 		openMathOperator = str(argumentEntries[0].get(OPERATOR))
-		operator = OperatorDictionary.getMathJsSymbol(openMathOperator)
+		operator = OperatorDictionary.getSmtSymbol(openMathOperator)
 		argumentNames = list()
 		for entry in argumentEntries:
 			argType = str(entry.get(ARGTYPE))
@@ -180,7 +188,7 @@ def get_arguments_of_application(parent_application: Application, bindings: Muta
 			raise Exception(f"Error trying to obtain the operator of application. Multiple operators found: {str(operators)}")
 
 		openMathOperator = str(argumentEntries[0].get(OPERATOR))
-		operator = OperatorDictionary.getMathJsSymbol(openMathOperator)
+		operator = OperatorDictionary.getSmtSymbol(openMathOperator)
 		
 		getArgNames: Callable[[Mapping[Variable, Identifier]], str] = lambda binding: str(binding.get(ARGNAME))
 		argumentNames = list(map(getArgNames, argumentEntries))

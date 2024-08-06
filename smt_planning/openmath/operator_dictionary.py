@@ -1,12 +1,12 @@
 from smt_planning.openmath.math_symbol_information import MathSymbolInformation
 
 class OperatorDictionary:
-	mathJsToOpenMathMapping = {
+	smtToOpenMathMapping = {
 		# Relations
 		"=": "http://www.openmath.org/cd/relation1#eq",
 		"<": "http://www.openmath.org/cd/relation1#lt", 
 		">": "http://www.openmath.org/cd/relation1#gt", 
-		"!=": "http://www.openmath.org/cd/relation1#neq",
+		"distinct": "http://www.openmath.org/cd/relation1#neq",
 		"<=": "http://www.openmath.org/cd/relation1#leq",
 		">=": "http://www.openmath.org/cd/relation1#geq", 
 		#Logic relations
@@ -26,12 +26,12 @@ class OperatorDictionary:
 		"tan": "http://www.openmath.org/cd/transc1#tan",
 	}
 
-	openMathToMathJsMapping = {
+	openMathToSmtMapping = {
 		# Relations
 		"http://www.openmath.org/cd/relation1#eq": MathSymbolInformation("=", 2),
 		"http://www.openmath.org/cd/relation1#lt": MathSymbolInformation("<",2),
 		"http://www.openmath.org/cd/relation1#gt": MathSymbolInformation(">",2),
-		"http://www.openmath.org/cd/relation1#neq": MathSymbolInformation("!=", 2),
+		"http://www.openmath.org/cd/relation1#neq": MathSymbolInformation("distinct", 2),
 		"http://www.openmath.org/cd/relation1#leq": MathSymbolInformation("<=",2),
 		"http://www.openmath.org/cd/relation1#geq": MathSymbolInformation(">=", 2),
 		#Logic relations
@@ -52,15 +52,15 @@ class OperatorDictionary:
 	}
 
 	@staticmethod
-	def getOpenMathSymbol(mathJsSymbol: str) -> str:
+	def getOpenMathSymbol(smtSymbol: str) -> str:
 		try:
-			return OperatorDictionary.mathJsToOpenMathMapping[mathJsSymbol]
+			return OperatorDictionary.smtToOpenMathMapping[smtSymbol]
 		except:
 			return "http://www.openmath.org/cd/error#unhandled_symbol"
 
 	@staticmethod
-	def getMathJsSymbol(openMathSymbol: str)-> MathSymbolInformation:
+	def getSmtSymbol(openMathSymbol: str)-> MathSymbolInformation:
 		try:
-			return OperatorDictionary.openMathToMathJsMapping[openMathSymbol]
+			return OperatorDictionary.openMathToSmtMapping[openMathSymbol]
 		except:
 			raise Exception(f"Error while finding the MathJS symbol for the OpenMath symbol {openMathSymbol}")
