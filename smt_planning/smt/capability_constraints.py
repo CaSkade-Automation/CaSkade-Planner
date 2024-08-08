@@ -26,18 +26,21 @@ def capability_constraints_smt(happenings: int, event_bound: int) -> List[str]:
 
 
 def infix_to_prefix(infix_expression):
+	precedence_levels = {
+		'or': 0,
+		'and': 1,
+		'=': 2,
+		'>=': 2,
+		'<=': 2,
+		'distinct': 2,
+		'+': 3,
+		'-': 3,
+		'*': 4,
+		'/': 4,
+		'^': 5
+	}
+	
 	def precedence(operator):
-		precedence_levels = {
-			' or ': 0,
-			' and ': 1,
-			' = ': 2,
-			' distinct ': 2,
-			' + ': 3,
-			' - ': 3,
-			' * ': 4,
-			' / ': 4,
-			' ^ ': 5
-		}
 		return precedence_levels.get(operator, 0)
 
 	def reverse_expression(expression):
@@ -49,9 +52,9 @@ def infix_to_prefix(infix_expression):
 		expression = reverse_expression(expression)
 
 		split_expression = expression.split(" ")
-
+		reversed_operators = [reverse_expression(op) for op in precedence_levels.keys()]
 		for element in split_expression:
-			if len(element) == 1: # Operator
+			if element in reversed_operators: # Operator
 				while stack and precedence(element) <= precedence(stack[-1]):
 					output.append(stack.pop())
 				element = add_space(element)
