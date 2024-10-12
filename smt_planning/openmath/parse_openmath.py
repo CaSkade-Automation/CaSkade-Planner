@@ -32,21 +32,23 @@ def from_open_math_in_graph( query_handler, rootApplicationIri: str, happening: 
 	PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 	PREFIX DINEN61360: <http://www.w3id.org/hsu-aut/DINEN61360#>
 	PREFIX CaSk: <http://www.w3id.org/hsu-aut/cask#>
-	SELECT ?application (count(?argumentList)-1 as ?position) ?operator (COALESCE(?argDE, ?arg) AS ?argName) ?argType ?arg WHERE {
+	SELECT ?application (count(?argumentList)-1 as ?position) ?operator (COALESCE(?argDE, ?arg) AS ?argName) ?argType ?argValue ?arg WHERE {
 		#?application a OM:Application, CSS:CapabilityConstraint.
 		?application OM:arguments/rdf:rest* ?argumentList;
 										OM:operator ?operator.
 
 		?argumentList rdf:rest*/rdf:first ?arg.
 		?arg a ?argType.
-		?argType rdfs:subClassOf OM:Object.
-		# FILTER(STRSTARTS(STR(?argType), "http://openmath.org"))
+		FILTER(STRSTARTS(STR(?argType), "http://openmath.org"))
 		OPTIONAL {
 			#?arg OM:name ?argName.
 			?argDE DINEN61360:has_Instance_Description ?arg.
 		}
+		OPTIONAL {
+			?arg OM:value ?argValue.
+		}
 	}
-	GROUP BY ?application ?argDE ?operator ?argType ?arg
+	GROUP BY ?application ?argDE ?operator ?argValue ?argType ?arg
 	"""
 	
 	# Fire query and get results as an array
@@ -69,17 +71,22 @@ def create_expression(operator:MathSymbolInformation, argumentExpression: list[s
 		expression = f"{operatorSymbol}({argumentExpression})"
 	if (arity == 2):
 		# Binary operators are constructed by concatenating operator and arguments, e.g. x + y + z...
-		if pad:
-			property_dictionary = StateHandler().get_property_dictionary()
-			padded_expression = []
-			for elem in argumentExpression:
+		# if pad:
+		property_dictionary = StateHandler().get_property_dictionary()
+		padded_expression = []
+		for elem in argumentExpression:
+			try:
 				relation_type = property_dictionary.get_property_relation_type(elem)
 				if relation_type == "Input":
 					padded_expression.append(f"|{elem}_{happening}_0|")
 				else:
 					padded_expression.append(f"|{elem}_{happening}_1|")
-		else: 
-			padded_expression = [f"{elem}" for elem in argumentExpression]
+			except:
+				# If finding the property fails, just insert the element. This is a bit hacky. 
+				# Would probably be better to pass an object with type info in the argumentlist so that we can check for the type (om:variable vs om:literal) here
+				padded_expression.append(f"{elem}")
+		# else: 
+			# padded_expression = [f"{elem}" for elem in argumentExpression]
 		expression = operatorSymbol.join(padded_expression)
 
 	return expression
@@ -162,16 +169,17 @@ def get_arguments_of_application(parent_application: Application, bindings: Muta
 	
 	child_applications = convert_bindings_to_applications(child_bindings)
 
+	argumentNames = list()
 	if (len(child_applications) > 0):
 		openMathOperator = str(argumentEntries[0].get(OPERATOR))
 		operator = OperatorDictionary.getSmtSymbol(openMathOperator)
-		argumentNames = list()
 		for entry in argumentEntries:
+			# Bit ugly to have argType here, but we have to skip on applications
 			argType = str(entry.get(ARGTYPE))
-			if argType == 'http://openmath.org/vocab/math#Variable':
-				argumentNames.append(str(entry.get(ARGNAME)))
-			elif argType == 'http://openmath.org/vocab/math#Literal':
-				argumentNames.append(str(entry.get(ARGVALUE)))
+			if argType == 'http://openmath.org/vocab/math#Application':
+				continue
+			arg_name_or_value = get_arg_name(entry)
+			argumentNames.append(arg_name_or_value)
 		
 		argumentsOfChildApplications = list()
 		for childApp in child_applications:
@@ -190,14 +198,22 @@ def get_arguments_of_application(parent_application: Application, bindings: Muta
 		openMathOperator = str(argumentEntries[0].get(OPERATOR))
 		operator = OperatorDictionary.getSmtSymbol(openMathOperator)
 		
-		getArgNames: Callable[[Mapping[Variable, Identifier]], str] = lambda binding: str(binding.get(ARGNAME))
-		argumentNames = list(map(getArgNames, argumentEntries))
+		# getArgNames: Callable[[Mapping[Variable, Identifier]], str] = lambda binding: str(binding.get(ARGNAME))
+		for entry in argumentEntries:
+			arg_name_or_value = get_arg_name(entry)
+			argumentNames.append(arg_name_or_value)
 		
 		string = create_expression(operator, argumentNames, happening, event, True)
 	
 	return string
 
 
+def get_arg_name(entry: Mapping[Variable, Identifier]):
+	argType = str(entry.get(ARGTYPE))
+	if argType == 'http://openmath.org/vocab/math#Variable':
+		return str(entry.get(ARGNAME))
+	elif argType == 'http://openmath.org/vocab/math#Literal':
+		return str(entry.get(ARGVALUE))
 
 
 class QueryCache:
