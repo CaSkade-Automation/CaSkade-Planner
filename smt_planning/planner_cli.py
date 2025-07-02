@@ -46,7 +46,9 @@ def plan_from_file(
 ) -> None:
 	planner = CaskadePlanner(required_capability_iri)
 	planner.with_file_query_handler(ontology_file)
-	planner.cask_to_smt(max_happenings, problem_file, model_file, plan_file)
+	result = planner.cask_to_smt(max_happenings, problem_file, model_file, plan_file)
+	result_json = result.to_json()
+	print(result_json)
 
 
 @app.command()
