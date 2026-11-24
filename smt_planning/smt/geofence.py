@@ -12,8 +12,9 @@ def geofence_smt(happenings: int, event_bound: int) -> List[BoolRef]:
     robot_id = 1
 
     for robot in gf_dict.robots.values():
-        # Define a list of vertices representing the polygon
-        gozone_polygon = robot.gozone.generate_polygon()
+        # Define a list of vertices representing the polygon. A robot without a gozone is restricted by its geofence
+        allowed_area = robot.gozone if robot.gozone.points else robot.geofence
+        gozone_polygon = allowed_area.generate_polygon()
         #TODO: What to do with gozone split in multiple polygons? A vehicle can enter its other gozone only if another robot moves this robot to other gozone 
         nogozone_polygons: Dict[int, List[Tuple[float, float]]] = {}
         hole_number = 0
