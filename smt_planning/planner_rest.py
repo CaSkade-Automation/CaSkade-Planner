@@ -72,8 +72,9 @@ def generate_and_solve_plan():
 	if max_happenings == None:
 		max_happenings = 5
 	result = planner.cask_to_smt(max_happenings)
-	if result == None:
-		return jsonify({'error': 'No plan found'}), 404
+	if result.plan is None:
+		# No plan found. The result contains the unsat core that explains why
+		return jsonify(result.as_dict()), 404
 	return result.as_dict()
 
 def run():

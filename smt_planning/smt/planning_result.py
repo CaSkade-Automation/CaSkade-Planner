@@ -1,6 +1,7 @@
 
 import json
 from datetime import datetime
+from enum import Enum
 from typing import List, Dict, Set
 from z3 import ModelRef, RatNumRef, IntNumRef, BoolRef
 
@@ -137,12 +138,33 @@ class Plan:
 		return dict
 
 
-class PlanningResult:
-	def __init__(self, model: ModelRef):
-		self.time_created = datetime.now()
-		self.plan = self.derive_plan_from_model(model)
+class PlanningResultType(Enum):
+	SAT = "sat"
+	UNSAT = "unsat"
 
-	def derive_plan_from_model(self, model: ModelRef) -> Plan:
+
+class PlanningResult:
+	"""
+	The overall planning result. If a plan was found, the type is SAT and the result contains the plan.
+	If no plan was found, the type is UNSAT, there is no plan and the result contains a minimal unsat core that explains why.
+	"""
+
+	def __init__(self, result_type: PlanningResultType, plan: Plan | None, unsat_core: List[str] | None):
+		self.time_created = datetime.now()
+		self.result_type = result_type
+		self.plan = plan
+		self.unsat_core = unsat_core
+
+	@classmethod
+	def from_model(cls, model: ModelRef) -> "PlanningResult":
+		return cls(PlanningResultType.SAT, cls.derive_plan_from_model(model), None)
+
+	@classmethod
+	def from_unsat_core(cls, unsat_core: List[str]) -> "PlanningResult":
+		return cls(PlanningResultType.UNSAT, None, unsat_core)
+
+	@staticmethod
+	def derive_plan_from_model(model: ModelRef) -> Plan:
 		property_dictionary = StateHandler().get_property_dictionary()
 		capability_dictionary = StateHandler().get_capability_dictionary()
 
@@ -184,6 +206,8 @@ class PlanningResult:
 	def as_dict(self) -> Dict[str, object]:
 		dict = {
 			"time_created": str(self.time_created),
-			"plan": self.plan.as_dict()
+			"result_type": self.result_type.value,
+			"plan": self.plan.as_dict() if self.plan is not None else None,
+			"unsat_core": self.unsat_core
 		}
 		return dict

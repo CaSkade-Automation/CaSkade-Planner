@@ -4,6 +4,7 @@ from typing import List
 import pytest
 
 from smt_planning.smt.cask_to_smt import CaskadePlanner
+from smt_planning.smt.planning_result import PlanningResultType
 
 """
 These tests check if the planner correctly plans missions for robots that are restricted by a gozone.
@@ -49,7 +50,7 @@ class TestGozones:
 	])
 	def test_mission_inside_gozone_is_solved(self, ontology_file: str, expected_steps: List[List[str]]):
 		result = plan(ontology_file)
-		assert result is not None, "A plan should be found"
+		assert result.result_type is PlanningResultType.SAT, "A plan should be found"
 		assert result.plan.plan_length == len(expected_steps), f"Plan length should be {len(expected_steps)}"
 
 		for step_number, expected_capabilities in enumerate(expected_steps):
@@ -66,4 +67,5 @@ class TestGozones:
 	])
 	def test_mission_across_split_gozone_is_not_solved(self, ontology_file: str):
 		result = plan(ontology_file)
-		assert result is None, "No plan should be found"
+		assert result.result_type is PlanningResultType.UNSAT, "No plan should be found"
+		assert result.plan is None, "There should be no plan"

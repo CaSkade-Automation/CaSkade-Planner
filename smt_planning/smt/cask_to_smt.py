@@ -1,8 +1,9 @@
-import json 
+import json
 import time
+from typing import Dict, List
 
 from smt_planning.ontology_handling.query_handlers import FileQueryHandler, SparqlEndpointQueryHandler
-from z3 import Solver, Optimize, unsat, Bool, Sum
+from z3 import Solver, Optimize, unsat, Bool, BoolRef, BoolVal, Sum, is_expr
 from smt_planning.smt.StateHandler import StateHandler
 from smt_planning.openmath.parse_openmath import QueryCache
 from smt_planning.ontology_handling.capability_and_property_query import get_all_properties, get_provided_capabilities
@@ -24,6 +25,7 @@ from smt_planning.smt.robots_same_position import robot_positions_smt
 from smt_planning.smt.capability_mutexes import get_capability_mutexes
 from smt_planning.smt.geofence import geofence_smt
 from smt_planning.smt.planning_result import PlanningResult
+from smt_planning.smt.unsat_core import find_minimal_unsat_core
 
 class CaskadePlanner:
 
@@ -40,7 +42,14 @@ class CaskadePlanner:
 		comment = Bool(f"## {comment_text} ##")
 		solver.add(comment)
 
-	def cask_to_smt(self, max_happenings: int = 5, problem_location = None, model_location = None, plan_location = None):
+	def add_assertions(self, solver: Solver, named_assertions: Dict[str, BoolRef], group: str, assertions: List[BoolRef]) -> None:
+		# Adds assertions to the solver and stores them under a unique name, which is needed to find an unsat core if no plan can be found
+		for number, assertion in enumerate(assertions):
+			# Some assertions are plain Python booleans, e.g. a comparison of two constants
+			named_assertions[f"{group}_{number}"] = assertion if is_expr(assertion) else BoolVal(assertion)
+			solver.add(assertion)
+
+	def cask_to_smt(self, max_happenings: int = 5, problem_location = None, model_location = None, plan_location = None) -> PlanningResult:
 
 		start_time = time.time()
 		state_handler = StateHandler()
@@ -75,10 +84,14 @@ class CaskadePlanner:
 		geofence_dictionary = get_geofence_constraints()
 		state_handler.set_geofence_dictionary(geofence_dictionary)
 
+		# All assertions of the current number of happenings with a unique name
+		named_assertions: Dict[str, BoolRef] = {}
+
 		while (happenings <= max_happenings and solver_result == unsat):
 			# SMT Solver
 			solver = Solver()
 			solver.reset()
+			named_assertions = {}
 			state_handler.reset_caches()
 			solver_result = unsat
 			happenings += 1
@@ -93,92 +106,87 @@ class CaskadePlanner:
 			# ------------------------------Ressource IDs---------------------------------------------------
 			self.add_comment(solver, "Start of resource ids")
 			resource_ids = create_resource_ids(happenings, event_bound)
-			for resource_id in resource_ids:
-				solver.add(resource_id)
+			self.add_assertions(solver, named_assertions, "resource_ids", resource_ids)
 
 			# ------------------------Constraint Proposition (H1 + H2) --> bool properties------------------
 			self.add_comment(solver, "Start of constraints proposition")
 			bool_constraints = get_bool_constraints(happenings, event_bound)
-			for bool_constraint in bool_constraints:
-				solver.add(bool_constraint)	
+			self.add_assertions(solver, named_assertions, "bool_constraints", bool_constraints)
 
 			# ---------------------Constraint Real Variable (H5) --> real properties-----------------------------
 			self.add_comment(solver, "Start of constraints real variables")
 			variable_constraints = get_variable_constraints(happenings, event_bound)
-			for variable_constraint in variable_constraints:
-				solver.add(variable_constraint)	
+			self.add_assertions(solver, named_assertions, "variable_constraints", variable_constraints)
 
 			# ----------------- Capability Precondition ------------------------------------------------------
 			self.add_comment(solver, "Start of preconditions")
 			preconditions = capability_preconditions_smt(happenings, event_bound)
-			for precondition in preconditions:
-				solver.add(precondition)
+			self.add_assertions(solver, named_assertions, "preconditions", preconditions)
 
 			# --------------------------------------- Capability Effect ---------------------------------------
 			self.add_comment(solver, "Start of effects")
 			effects = capability_effects_smt(happenings, event_bound)
-			for effect in effects:
-				solver.add(effect)
+			self.add_assertions(solver, named_assertions, "effects", effects)
 
 			# Capability constraints are expressions in smt2 form that cannot be added programmatically. Thus, we take the current solver in string form
 			# We create a new solver object. Then we take the current solver string and add the constraint strings. We then re-import everything back into the fresh solver object
 			# It has to be a fresh object because just re-importing doesn't clear everything
 			self.add_comment(solver, "Start of capability constraints")
 			current_solver_string = solver.to_smt2()
+			number_of_assertions = len(solver.assertions())
 			solver = Solver()
 			constraints = capability_constraints_smt(happenings, event_bound)
 			for constraint in constraints:
-				current_solver_string += f"\n{constraint}" 
+				current_solver_string += f"\n{constraint}"
 
 			solver.from_string(current_solver_string)
+
+			# The re-imported solver contains the previous assertions followed by the capability constraints
+			capability_constraints = solver.assertions()[number_of_assertions:]
+			if len(capability_constraints) != len(constraints):
+				raise RuntimeError(f"Expected {len(constraints)} capability constraints after re-import of the solver, but found {len(capability_constraints)}.")
+			for number, capability_constraint in enumerate(capability_constraints):
+				named_assertions[f"capability_constraints_{number}"] = capability_constraint
 
 			# ---------------- Constraints Capability mutexes (H14) -----------------------------------------
 			self.add_comment(solver, "Start of capability mutexes")
 			capability_mutexes = get_capability_mutexes(happenings)
-			for capability_mutex in capability_mutexes:
-				solver.add(capability_mutex)		
+			self.add_assertions(solver, named_assertions, "capability_mutexes", capability_mutexes)
 
 			# ---------------- Init  --------------------------------------------------------
 			self.add_comment(solver, "Start of init")
 			inits = init_smt()
-			for init in inits:
-				solver.add(init)												
+			self.add_assertions(solver, named_assertions, "inits", inits)
 
 			# ---------------------- Goal ------------------------------------------------- 
 			self.add_comment(solver, "Start of goal")
 			goals = goal_smt()
-			for goal in goals:
-				solver.add(goal)
+			self.add_assertions(solver, named_assertions, "goals", goals)
 
 			# ------------------- Proposition support (P5 + P6) ----------------------------
 			self.add_comment(solver, "Start of proposition support")
 			proposition_supports = getPropositionSupports(happenings, event_bound)
-			for support in proposition_supports:
-				solver.add(support)
+			self.add_assertions(solver, named_assertions, "proposition_supports", proposition_supports)
 
 			# ----------------- Continuous change on real variables (P11) ------------------
 			self.add_comment(solver, "Start of real variable continuous change")
 			real_variable_cont_changes = get_real_variable_continuous_changes(happenings, event_bound)
-			for real_variable_cont_change in real_variable_cont_changes:
-				solver.add(real_variable_cont_change)
+			self.add_assertions(solver, named_assertions, "real_variable_cont_changes", real_variable_cont_changes)
 
 			# ----------------- Cross-connection of related properties (new) -----------------
 			self.add_comment(solver, "Start of related properties")
 			property_cross_relations = get_property_cross_relations(happenings, event_bound)
-			for cross_relation in property_cross_relations:
-				solver.add(cross_relation)
+			self.add_assertions(solver, named_assertions, "property_cross_relations", property_cross_relations)
 
 			# ----------------- Geofence constraints (new) -----------------
 			self.add_comment(solver, "Start of geofence constraints")
 			geofence_constraints = geofence_smt(happenings, event_bound)
-			for geofence_constraint in geofence_constraints:
-				solver.add(geofence_constraint)
+			self.add_assertions(solver, named_assertions, "geofence_constraints", geofence_constraints)
 
 			# ----------------- Robots are not allowed to be at same position (new) -----------------
 			self.add_comment(solver, "Start of robots not at same position constraints")
 			robots_not_same_position_constraints = robot_positions_smt(happenings, event_bound)
-			for robots_not_same_position_constraint in robots_not_same_position_constraints:
-				solver.add(robots_not_same_position_constraint)
+			self.add_assertions(solver, named_assertions, "robots_not_same_position_constraints", robots_not_same_position_constraints)
 
 			# Optimize by minimizing number of used capabilities to prevent unnecessary use of capabilities
 			constraints = solver.assertions()
@@ -200,7 +208,7 @@ class CaskadePlanner:
 				print(f"No solution with {happenings} happening(s) found.")
 			else:
 				model = opt.model()
-				plan = PlanningResult(model)
+				plan = PlanningResult.from_model(model)
 
 				if problem_location:
 					# if problem_location is passed, store problem
@@ -221,4 +229,10 @@ class CaskadePlanner:
 						json.dump(plan, json_file, default=lambda o: o.as_dict(), indent=4)
 
 
-				return plan 
+				return plan
+
+		# No plan was found. Explain why by a minimal unsat core of the problem with the highest number of happenings
+		start_time_unsat_core = time.time()
+		unsat_core = find_minimal_unsat_core(named_assertions)
+		print(f"Time for finding minimal unsat core: {time.time() - start_time_unsat_core}")
+		return PlanningResult.from_unsat_core([str(assertion) for assertion in unsat_core])

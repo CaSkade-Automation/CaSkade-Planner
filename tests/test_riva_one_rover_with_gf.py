@@ -1,6 +1,6 @@
 import os
 from smt_planning.smt.cask_to_smt import CaskadePlanner
-from smt_planning.smt.planning_result import PlanningResult
+from smt_planning.smt.planning_result import PlanningResult, PlanningResultType
 
 """
 This test checks if the planner can correctly plan missions for a rover with a geofence. 
@@ -82,14 +82,15 @@ class TestRoverWithGF:
 		assert property_item_grabbed_output == True, "Grabbed-Property of Item should be output of drop capability"
 
 
-	#TODO Tests for the rover with geofence, that do not allow a plan. Here more than "None" need to be checked
 	def test_two_create_and_solve_fail_item_goal(self):
 		ontology_file = os.getcwd() + "/tests/riva_one_rover_with_gf_fail_item_goal.ttl"
 		max_happenings = 3
 		planner: CaskadePlanner = CaskadePlanner() 
 		planner.with_file_query_handler(ontology_file)
 		expected_plan : PlanningResult = planner.cask_to_smt(max_happenings, "./problem.smt", "smt_solution.json", "plan.json") #type: ignore
-		assert expected_plan == None, "No plan should be found"
+		assert expected_plan.result_type is PlanningResultType.UNSAT, "No plan should be found"
+		assert expected_plan.plan is None, "There should be no plan"
+		assert expected_plan.unsat_core, "An unsat core should be returned"
 
 	def test_two_create_and_solve_fail_item_start(self):
 		ontology_file = os.getcwd() + "/tests/riva_one_rover_with_gf_fail_item_start.ttl"
@@ -97,7 +98,9 @@ class TestRoverWithGF:
 		planner: CaskadePlanner = CaskadePlanner() 
 		planner.with_file_query_handler(ontology_file)
 		expected_plan : PlanningResult = planner.cask_to_smt(max_happenings, "./problem.smt", "smt_solution.json", "plan.json") #type: ignore
-		assert expected_plan == None, "No plan should be found"
+		assert expected_plan.result_type is PlanningResultType.UNSAT, "No plan should be found"
+		assert expected_plan.plan is None, "There should be no plan"
+		assert expected_plan.unsat_core, "An unsat core should be returned"
 
 	def test_riva_one_rover_with_gf_and_current_holder(self):
 		ontology_file = os.getcwd() + "/tests/riva_one_rover_with_gf_and_current_holder.ttl"
