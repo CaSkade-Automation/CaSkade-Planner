@@ -71,25 +71,24 @@ def create_expression(operator:MathSymbolInformation, argumentExpression: list[s
 		expression = f"{operatorSymbol}({argumentExpression})"
 	if (arity == 2):
 		# Binary operators are constructed by concatenating operator and arguments, e.g. x + y + z...
-		# if pad:
-		property_dictionary = StateHandler().get_property_dictionary()
-		padded_expression = []
-		for elem in argumentExpression:
-			try:
-				relation_type = property_dictionary.get_property_relation_type(elem)
-				if relation_type == "Input":
-					padded_expression.append(f"|{elem}_{happening}_0|")
-				else:
-					padded_expression.append(f"|{elem}_{happening}_1|")
-			except:
-				# If finding the property fails, just insert the element. This is a bit hacky. 
-				# Would probably be better to pass an object with type info in the argumentlist so that we can check for the type (om:variable vs om:literal) here
-				padded_expression.append(f"{elem}")
-		# else: 
-			# padded_expression = [f"{elem}" for elem in argumentExpression]
+		padded_expression = [create_operand(elem, happening, event) for elem in argumentExpression]
 		expression = operatorSymbol.join(padded_expression)
 
 	return expression
+
+
+def create_operand(operand: str, happening: int, event: int) -> str:
+	# Returns the SMT variable name if the operand is a property or a resource. Literals and nested expressions are returned as they are
+	# The event is given by the constraint: A constraint on inputs holds at the start of a happening, a constraint on outputs at its end.
+	# It cannot be derived from the property, because properties of a resource (e.g. its position) are both input and output of capabilities
+	state_handler = StateHandler()
+	property_dictionary = state_handler.get_property_dictionary()
+	is_property = operand in property_dictionary.provided_properties or operand in property_dictionary.required_properties
+	is_resource = operand in state_handler.get_resource_dictionary().resources
+	if is_property or is_resource:
+		return f"|{operand}_{happening}_{event}|"
+
+	return f"{operand}"
 
 
 def matches_Iri_and_has_no_higher_parent(bindings: MutableSequence[Mapping[Variable, Identifier]], rootApplicationIri: str):
