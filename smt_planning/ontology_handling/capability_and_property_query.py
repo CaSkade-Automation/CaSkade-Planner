@@ -110,7 +110,7 @@ def get_output_influences_of_capability(capability_iri: str) -> List[CapabilityP
 	PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 	PREFIX OM: <http://openmath.org/vocab/math#>
 	PREFIX OM-Relation1: <http://www.openmath.org/cd/relation1#>
-	SELECT ?cap ?input_de ?inputStateClass ?inputExpressionGoal ?inputValue ?output_de ?outputStateClass ?outputValue ?equalConstraint WHERE {
+	SELECT ?cap ?input_de ?inputStateClass ?inputExpressionGoal ?inputValue ?output_de ?outputStateClass ?outputValue ?equalConstraint ?resourceConstraint WHERE {
 		BIND(<{capability_iri}> AS ?cap)
 		?cap a CaSk:ProvidedCapability;
 			^CSS:requiresCapability ?process.	
@@ -145,6 +145,14 @@ def get_output_influences_of_capability(capability_iri: str) -> List[CapabilityP
 				OM:arguments/rdf:rest/rdf:first|OM:arguments/rdf:first ?output_id;
 									OM:operator OM-Relation1:eq.
 		}
+		OPTIONAL {
+			# Output is set to a resource, e.g. the holder of an item is set to the robot that grabs it
+			?cap CSS:isRestrictedBy ?resourceConstraint.
+			?resourceConstraint OM:arguments/rdf:rest/rdf:first|OM:arguments/rdf:first ?output_id;
+				OM:arguments/rdf:rest/rdf:first|OM:arguments/rdf:first ?resource;
+				OM:operator OM-Relation1:eq.
+			?resource CSS:providesCapability ?anyCapability.
+		}
 	} """
 	query_string = query_string.replace('{capability_iri}', capability_iri)
 	query_handler = StateHandler().get_query_handler()
@@ -156,9 +164,12 @@ def get_output_influences_of_capability(capability_iri: str) -> List[CapabilityP
 		# capDict.add_CapabilityOccurrence(str(row['cap']), "http://www.w3id.org/hsu-aut/cask#ProvidedCapability", happening, [], [])
 		property_iri = str(row['output_de'])
 		prop = property_dictionary.get_property(property_iri)
-		if(not row.get('equalConstraint') and not row.get('outputValue') and not row.get('inputValue')):
+		if(not row.get('equalConstraint') and not row.get('outputValue') and not row.get('inputValue') and not row.get('resourceConstraint')):
 			continue
-		if(row.get('equalConstraint')):
+		if(row.get('resourceConstraint')):
+			# Output is set to a resource by a constraint. This is a property change even if there is no constraint between input and output
+			effect = PropertyChange.ChangeByExpression
+		elif(row.get('equalConstraint')):
 			if(not row.get('inputStateClass').eq(row.get('outputStateClass'))):
 				# equalConstraint but with different product type / information in output it is a property change
 				effect = PropertyChange.ChangeByExpression
