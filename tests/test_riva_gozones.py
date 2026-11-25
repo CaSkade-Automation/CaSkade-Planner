@@ -29,7 +29,7 @@ ROVER_AND_DRONE_PLAN = [
 
 
 def plan(ontology_file: str):
-	planner: CaskadePlanner = CaskadePlanner()
+	planner: CaskadePlanner = CaskadePlanner("http://www.hsu-hh.de/aut/RIVA/Logistic#required-cap-logistics")
 	planner.with_file_query_handler(os.path.join(ONTOLOGY_FOLDER, ontology_file))
 	return planner.cask_to_smt(MAX_HAPPENINGS)
 

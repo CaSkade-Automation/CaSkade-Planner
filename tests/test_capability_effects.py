@@ -10,12 +10,13 @@ These tests check if the effects of a capability on its output properties are de
 """
 
 NAMESPACE = "http://www.hsu-hh.de/aut/RIVA/Logistic#"
+REQUIRED_CAPABILITY = NAMESPACE + "required-cap-logistics"
 
 
 def get_effects(ontology_file: str, capability: str):
 	state_handler = StateHandler()
 	state_handler.set_query_handler(FileQueryHandler(os.path.join(os.getcwd(), "tests", ontology_file)))
-	state_handler.set_property_dictionary(get_all_properties())
+	state_handler.set_property_dictionary(get_all_properties(REQUIRED_CAPABILITY))
 	influences = get_output_influences_of_capability(NAMESPACE + capability)
 	return {(influence.property.iri.removeprefix(NAMESPACE), influence.effect) for influence in influences}
 

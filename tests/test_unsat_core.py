@@ -36,7 +36,7 @@ class TestUnsatCore:
 	"""
 	def test_unsolvable_mission_returns_unsat_core_with_gozone(self):
 		ontology_file = os.path.join(os.getcwd(), "tests", "gozone_ontologies", "riva_one_rover_with_gz_split_fail.ttl")
-		planner: CaskadePlanner = CaskadePlanner()
+		planner: CaskadePlanner = CaskadePlanner("http://www.hsu-hh.de/aut/RIVA/Logistic#required-cap-logistics")
 		planner.with_file_query_handler(ontology_file)
 		result = planner.cask_to_smt(3)
 		assert result.result_type is PlanningResultType.UNSAT, "No plan should be found"

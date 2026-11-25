@@ -29,6 +29,10 @@ from smt_planning.smt.unsat_core import find_minimal_unsat_core
 
 class CaskadePlanner:
 
+	def __init__(self, required_capability_iri: str) -> None:
+		# IRI of the required capability that a plan is searched for
+		self.required_capability_iri = required_capability_iri
+
 	def with_file_query_handler(self, filename: str):
 		self.query_handler = FileQueryHandler(filename)
 
@@ -64,7 +68,7 @@ class CaskadePlanner:
 		QueryCache.reset()
 			
 		# Get all properties connected to provided capabilities as inputs or outputs as well as all instance descriptions 
-		property_dictionary = get_all_properties()
+		property_dictionary = get_all_properties(self.required_capability_iri)
 		state_handler.set_property_dictionary(property_dictionary)
 
 		# Get provided capabilities and their influence on output objects as well as resources that provide capabilities
@@ -110,12 +114,12 @@ class CaskadePlanner:
 
 			# ------------------------Constraint Proposition (H1 + H2) --> bool properties------------------
 			self.add_comment(solver, "Start of constraints proposition")
-			bool_constraints = get_bool_constraints(happenings, event_bound)
+			bool_constraints = get_bool_constraints(happenings, event_bound, self.required_capability_iri)
 			self.add_assertions(solver, named_assertions, "bool_constraints", bool_constraints)
 
 			# ---------------------Constraint Real Variable (H5) --> real properties-----------------------------
 			self.add_comment(solver, "Start of constraints real variables")
-			variable_constraints = get_variable_constraints(happenings, event_bound)
+			variable_constraints = get_variable_constraints(happenings, event_bound, self.required_capability_iri)
 			self.add_assertions(solver, named_assertions, "variable_constraints", variable_constraints)
 
 			# ----------------- Capability Precondition ------------------------------------------------------
@@ -125,7 +129,7 @@ class CaskadePlanner:
 
 			# --------------------------------------- Capability Effect ---------------------------------------
 			self.add_comment(solver, "Start of effects")
-			effects = capability_effects_smt(happenings, event_bound)
+			effects = capability_effects_smt(happenings, event_bound, self.required_capability_iri)
 			self.add_assertions(solver, named_assertions, "effects", effects)
 
 			# Capability constraints are expressions in smt2 form that cannot be added programmatically. Thus, we take the current solver in string form
@@ -175,7 +179,7 @@ class CaskadePlanner:
 
 			# ----------------- Cross-connection of related properties (new) -----------------
 			self.add_comment(solver, "Start of related properties")
-			property_cross_relations = get_property_cross_relations(happenings, event_bound)
+			property_cross_relations = get_property_cross_relations(happenings, event_bound, self.required_capability_iri)
 			self.add_assertions(solver, named_assertions, "property_cross_relations", property_cross_relations)
 
 			# ----------------- Geofence constraints (new) -----------------

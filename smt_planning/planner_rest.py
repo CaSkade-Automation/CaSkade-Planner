@@ -48,16 +48,16 @@ def setup_planner_with_file(files: ImmutableMultiDict[str, FileStorage], require
 def ping():
 	return Response(status=204)
 
-# Wait for POST requests with a query param ?mode to /plan
+# Wait for POST requests to /plan. Parameters are passed as JSON (mode sparql-endpoint) or as form fields next to the uploaded file (mode file)
 @app.post('/plan') # type: ignore
 def generate_and_solve_plan():
-	if (not request.is_json):
-		return jsonify({"message": "Request must be JSON"}), 400
-	
-	# Get JSON request body
-	data = request.get_json()
+	# A request with an uploaded file cannot be JSON, so parameters are taken from the form fields in this case
+	data = request.get_json() if request.is_json else request.form
 	mode = data.get('mode')
 	required_capability_iri = data.get('requiredCapabilityIri')
+
+	if not required_capability_iri:
+		return jsonify({'error': 'No requiredCapabilityIri provided'}), 400
 
 	if mode == 'file':
 		planner = setup_planner_with_file(request.files, required_capability_iri) # type: ignore
@@ -72,6 +72,9 @@ def generate_and_solve_plan():
 			return jsonify({'error': 'No endpoint-url provided'}), 400
 		planner = CaskadePlanner(required_capability_iri)
 		planner.with_endpoint_query_handler(endpoint_url)
+
+	else:
+		return jsonify({'error': 'Mode has to be file or sparql-endpoint'}), 400
 
 	max_happenings = request.args.get('max-happenings',type=int)
 	

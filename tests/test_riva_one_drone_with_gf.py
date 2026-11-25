@@ -14,7 +14,7 @@ class TestDroneWithGF:
 	def test_one_create_and_solve(self):
 		ontology_file = os.getcwd() + "/tests/riva_one_drone_with_gf_and_current_holder.ttl"
 		max_happenings = 3
-		planner: CaskadePlanner = CaskadePlanner() 
+		planner: CaskadePlanner = CaskadePlanner("http://www.hsu-hh.de/aut/RIVA/Logistic#required-cap-logistics") 
 		planner.with_file_query_handler(ontology_file)
 		expected_plan : PlanningResult = planner.cask_to_smt(max_happenings, "./problem.smt", "smt_solution.json", "plan.json") #type:ignore
 		assert expected_plan.plan.plan_length == 3, "Plan length should be 3"

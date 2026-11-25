@@ -9,8 +9,7 @@ def get_all_properties(required_cap_iri: str) -> PropertyDictionary:
 	
 	# Names need to be a combination of the thing that has a property (ID) with the corresponding type description. 
 	# Thing and type description together define a certain property in a context.
-	# And we need to get properties that belong to the capabilitiy inputs / outputs themselves as well as to resources, hence the UNION.
-	# 
+	# Properties of resources are found this way, too, as long as they characterize an input or output of a capability.
 	query_string = """
 	PREFIX DINEN61360: <http://www.w3id.org/hsu-aut/DINEN61360#>
 	PREFIX CSS: <http://www.w3id.org/hsu-aut/css#>
@@ -18,24 +17,14 @@ def get_all_properties(required_cap_iri: str) -> PropertyDictionary:
 	PREFIX VDI3682: <http://www.w3id.org/hsu-aut/VDI3682#>
 	PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 	SELECT ?de (GROUP_CONCAT(?cap; SEPARATOR=",") AS ?caps) ?capType ?dataType ?relationType ?expr_goal ?log ?val WHERE {
-		{
-			# this part gets all the data elements of resources (that must provide a cap)
-			?resource CSS:providesCapability ?cap.
-			BIND(CaSk:ProvidedCapability as ?capType).
-			?cap a ?capType.
-			?resource DINEN61360:has_Data_Element ?de.
-		}
-		UNION 
-		{
-			# this part gets all properties that are directly connected to a process / capability
-			?process ?relation ?inout.
-		}
 		# All caps must have a type, that can either be provided or required (but if required, filter for the one we're plannning for)
 		?cap a ?capType;
 			^CSS:requiresCapability ?process.
 		values ?capType {
 			CaSk:ProvidedCapability CaSk:RequiredCapability 
 		}.
+		# All properties that are connected to an input or output of a process / capability
+		?process ?relation ?inout.
 		VALUES ?relation {
 				VDI3682:hasInput VDI3682:hasOutput
 		}.
