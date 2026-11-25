@@ -82,6 +82,9 @@ class TestRoverWithGF:
 		assert property_item_grabbed_output == True, "Grabbed-Property of Item should be output of drop capability"
 
 
+	"""
+	Same mission as in riva_one_rover_with_gf.ttl, but the goal position of the item is outside of the geofence.
+	"""
 	def test_two_create_and_solve_fail_item_goal(self):
 		ontology_file = os.getcwd() + "/tests/riva_one_rover_with_gf_fail_item_goal.ttl"
 		max_happenings = 3
@@ -91,7 +94,11 @@ class TestRoverWithGF:
 		assert expected_plan.result_type is PlanningResultType.UNSAT, "No plan should be found"
 		assert expected_plan.plan is None, "There should be no plan"
 		assert expected_plan.unsat_core, "An unsat core should be returned"
+		assert any("crossed_edge" in assertion for assertion in expected_plan.unsat_core), "The geofence should be part of the unsat core"
 
+	"""
+	Same mission as in riva_one_rover_with_gf.ttl, but the start position of the item is outside of the geofence.
+	"""
 	def test_two_create_and_solve_fail_item_start(self):
 		ontology_file = os.getcwd() + "/tests/riva_one_rover_with_gf_fail_item_start.ttl"
 		max_happenings = 3
@@ -101,6 +108,7 @@ class TestRoverWithGF:
 		assert expected_plan.result_type is PlanningResultType.UNSAT, "No plan should be found"
 		assert expected_plan.plan is None, "There should be no plan"
 		assert expected_plan.unsat_core, "An unsat core should be returned"
+		assert any("crossed_edge" in assertion for assertion in expected_plan.unsat_core), "The geofence should be part of the unsat core"
 
 	def test_riva_one_rover_with_gf_and_current_holder(self):
 		ontology_file = os.getcwd() + "/tests/riva_one_rover_with_gf_and_current_holder.ttl"
