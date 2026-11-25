@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 from smt_planning import __app_name__, __version__
 from smt_planning.smt.cask_to_smt import CaskadePlanner
@@ -47,7 +48,7 @@ def plan_from_file(
 	planner = CaskadePlanner(required_capability_iri)
 	planner.with_file_query_handler(ontology_file)
 	result = planner.cask_to_smt(max_happenings, problem_file, model_file, plan_file)
-	result_json = result.to_json()
+	result_json = json.dumps(result.as_dict(), indent=4)
 	print(result_json)
 
 
@@ -87,7 +88,7 @@ def plan_from_endpoint(
 	planner = CaskadePlanner(required_capability_iri)
 	planner.with_endpoint_query_handler(endpoint_url)
 	result = planner.cask_to_smt(max_happenings, problem_file, model_file, plan_file)
-	result_json = result.to_json()
+	result_json = json.dumps(result.as_dict(), indent=4)
 	print(result_json)
 
 
