@@ -112,7 +112,8 @@ class PropertyDictionary:
 	def add_instance_description(self, data_element_iri: str, cap_iri: str, cap_type: CapabilityType, expr_goal: str, logical_interpretation: str, value: str):
 		# Every instance description with expression goal "Variable" is a free variable, whose value will be determined during planning.
 		# As the value is determined by the planner, there must not be a value in the ontology.
-		if expr_goal == "Variable":
+		# An instance description without an expression goal and without a value is a free variable, too.
+		if expr_goal == "Variable" or (expr_goal == "None" and value == "None"):
 			if value != "None":
 				raise ValueError(f"The instance description of {data_element_iri} with the expression goal 'Variabe' has the value {value}. A Variable must not have a value.")
 			instance = FreeVariable(data_element_iri, cap_iri, logical_interpretation)
