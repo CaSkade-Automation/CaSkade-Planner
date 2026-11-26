@@ -1,6 +1,9 @@
 from typing import TypedDict
 from rdflib import Graph, URIRef, Literal, Variable
 from rdflib.query import Result
+from rdflib.namespace import OWL
+from urllib.parse import urlparse
+from pathlib import Path
 import json
 import requests
 from abc import ABC, abstractmethod
@@ -19,9 +22,25 @@ class FileQueryHandler(QueryHandler):
 		graph = Graph()
 		state_handler.set_graph(graph)
 
-		# Parse in an RDF file hosted beside this file
-		graph.parse(filename, format="turtle")
+		self._parsed = set()
+		self._parse_file(graph, filename)
 	
+	def _parse_file(self, graph: Graph, location: str) -> None:
+		"""Parse a file/IRI into ``graph`` and follow imports."""
+
+		if location in self._parsed:
+				return
+		self._parsed.add(location)
+
+		graph.parse(location)
+
+		base = Path(location).parent
+		for imported in set(graph.objects(None, OWL.imports)):
+				iri = str(imported)
+				if urlparse(iri).scheme == "":
+					iri = str((base / iri).resolve())
+				self._parse_file(graph, iri)
+
 	def query(self, query_string: str) -> Result:
 		from smt_planning.smt.StateHandler import StateHandler
 		graph = StateHandler().get_graph()
@@ -36,14 +55,17 @@ class SparqlEndpointQueryHandler(QueryHandler):
 		# Define the headers
 		self.headers = {
 			"Accept": "application/sparql-results+json",  # or "application/sparql-results+xml" for XML format
-			"Content-Type": "application/sparql-query"
+			"Content-Type": "application/sparql-query",
+		}
+		self.params = {
+			"infer": "false"
 		}
 	
 
 	def query(self, query_string: str) -> Result:
 
 		# Send the request
-		response = requests.post(self.endpoint_url, data=query_string, headers=self.headers)
+		response = requests.post(self.endpoint_url, data=query_string, headers=self.headers, params=self.params)
 
 		# Check if the request was successful
 		if response.status_code == 200:

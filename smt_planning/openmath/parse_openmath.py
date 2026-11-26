@@ -1,8 +1,8 @@
 from rdflib import Variable
 from rdflib.term import Identifier
 from typing import List, Dict, Mapping, Callable, MutableSequence
-from rdflib import URIRef
 from collections import defaultdict
+from smt_planning.dicts.name_util import convert_iri_to_z3_variable
 from smt_planning.smt.StateHandler import StateHandler
 from smt_planning.openmath.math_symbol_information import MathSymbolInformation
 from smt_planning.openmath.operator_dictionary import OperatorDictionary
@@ -33,7 +33,7 @@ def from_open_math_in_graph( query_handler, rootApplicationIri: str, happening: 
 	PREFIX DINEN61360: <http://www.w3id.org/hsu-aut/DINEN61360#>
 	PREFIX CaSk: <http://www.w3id.org/hsu-aut/cask#>
 	SELECT ?application (count(?argumentList)-1 as ?position) ?operator (COALESCE(?argDE, ?arg) AS ?argName) ?argType ?argValue ?arg WHERE {
-		#?application a OM:Application, CSS:CapabilityConstraint.
+		#?application a OM:Application, CSS:PropertyConstraint.
 		?application OM:arguments/rdf:rest* ?argumentList;
 										OM:operator ?operator.
 
@@ -86,7 +86,7 @@ def create_operand(operand: str, happening: int, event: int) -> str:
 	is_property = operand in property_dictionary.provided_properties or operand in property_dictionary.required_properties
 	is_resource = operand in state_handler.get_resource_dictionary().resources
 	if is_property or is_resource:
-		return f"|{operand}_{happening}_{event}|"
+		return f"|{convert_iri_to_z3_variable(operand, happening, event)}|"
 
 	return f"{operand}"
 

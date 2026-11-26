@@ -1,0 +1,20 @@
+@prefix : </#>.
+@prefix ont: <http://example.org/ontology#>.
+@prefix m: <http://openmath.org/vocab/math#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+
+# This T-Box info is required for queries to work. Usually, it would be included in the CaSk T-Box. 
+# It has been added here to keep this example compact
+m:Variable rdfs:subClassOf m:Object.
+
+ont:myApplication_equals
+	a m:Application;
+	m:arguments ( ont:x ont:y);
+m:operator "http://www.openmath.org/cd/relation1#eq".
+
+ont:x a m:Variable; 
+	m:name "x".
+
+ont:y a m:Variable; 
+	m:name "y".
+	

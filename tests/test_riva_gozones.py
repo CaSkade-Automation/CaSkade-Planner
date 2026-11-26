@@ -4,7 +4,7 @@ from typing import List
 import pytest
 
 from smt_planning.smt.cask_to_smt import CaskadePlanner
-from smt_planning.smt.planning_result import PlanningResultType
+from smt_planning.planning_result import PlanningResultType
 
 """
 These tests check if the planner correctly plans missions for robots that are restricted by a gozone.

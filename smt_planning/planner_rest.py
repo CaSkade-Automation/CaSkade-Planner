@@ -19,7 +19,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename: str) -> bool:
 	return '.' in filename and \
-			filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+		filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def setup_planner_with_file(files: ImmutableMultiDict[str, FileStorage], required_capability_iri: str) -> CaskadePlanner | tuple[Response, int]:
@@ -76,7 +76,10 @@ def generate_and_solve_plan():
 	else:
 		return jsonify({'error': 'Mode has to be file or sparql-endpoint'}), 400
 
-	max_happenings = request.args.get('max-happenings',type=int)
+	# Form fields are strings, so the value is converted
+	max_happenings = data.get('maxHappenings')
+	if max_happenings is not None:
+		max_happenings = int(max_happenings)
 	
 	# In case None gets passed as a max_happening, set back to default value of 5
 	if max_happenings == None:
@@ -84,8 +87,8 @@ def generate_and_solve_plan():
 	result = planner.cask_to_smt(max_happenings)
 	if result.plan is None:
 		# No plan found. The result contains the unsat core that explains why
-		return jsonify(result.as_dict()), 404
-	return result.as_dict()
+		return jsonify(result.to_json()), 404
+	return jsonify(result.to_json())
 
 def run():
 	app.run()

@@ -1,0 +1,829 @@
+@prefix : <http://www.hsu-hh.de/aut/ontologies/riva#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix CSS: <http://www.w3id.org/hsu-aut/css#> .
+@prefix CaSk: <http://www.w3id.org/hsu-aut/cask#> .
+@prefix DINEN61360: <http://www.w3id.org/hsu-aut/DINEN61360#> .
+@prefix VDI3682: <http://www.w3id.org/hsu-aut/VDI3682#> .
+@prefix openmath: <http://openmath.org/vocab/math#> .
+@prefix Rover: <http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#> .
+@base <http://www.hsu-hh.de/aut/ontologies/riva#> .
+
+<http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#> rdf:type owl:Ontology ;
+                                            owl:imports <http://www.w3id.org/hsu-aut/cask/3.0.1> ;
+                                            rdfs:comment "This ontology describes a simple complete rover with three capabilities, one for driving to a location, another for grabbing an item, and a third for dropping the grabbed item at another location." .
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#grabbed_TD
+Rover:grabbed_TD rdf:type owl:NamedIndividual ,
+                    DINEN61360:Type_Description .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#latitude_TD
+Rover:latitude_TD rdf:type owl:NamedIndividual ,
+                    DINEN61360:Type_Description .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#longitude_TD
+Rover:longitude_TD rdf:type owl:NamedIndividual ,
+                    DINEN61360:Type_Description .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap
+Rover:RequiredCap rdf:type owl:NamedIndividual ,
+                                VDI3682:ProcessOperator ,
+                                CaSk:RequiredCapability ;
+                        VDI3682:hasInput Rover:RequiredCap_Input_Item8 ;
+                        VDI3682:hasOutput Rover:RequiredCap_Output_Item8 ;
+                        CSS:requiresCapability Rover:RequiredCap .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Input_Item8
+Rover:RequiredCap_Input_Item8 rdf:type owl:NamedIndividual ,
+                                        VDI3682:Product ;
+                                DINEN61360:has_Data_Element Rover:RequiredCap_Input_Item8_grabbed_DE ,
+                                                            Rover:RequiredCap_Input_Item8_latitude_DE ,
+                                                            Rover:RequiredCap_Input_Item8_longitude_DE ;
+                                VDI3682:isCharacterizedBy Rover:RequiredCap_Input_Item8_grabbed_ID ,
+                                                            Rover:RequiredCap_Input_Item8_latitude_ID ,
+                                                            Rover:RequiredCap_Input_Item8_longitude_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Input_Item8_grabbed_DE
+Rover:RequiredCap_Input_Item8_grabbed_DE rdf:type owl:NamedIndividual ,
+                                                    DINEN61360:Data_Element ;
+                                            DINEN61360:has_Instance_Description Rover:RequiredCap_Input_Item8_grabbed_ID ;
+                                            DINEN61360:has_Type_Description Rover:grabbed_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Input_Item8_grabbed_ID
+Rover:RequiredCap_Input_Item8_grabbed_ID rdf:type owl:NamedIndividual ,
+                                                    DINEN61360:Boolean ,
+                                                    DINEN61360:Instance_Description ;
+                                            DINEN61360:Expression_Goal "Actual_Value" ;
+                                            DINEN61360:Logic_Interpretation "=" ;
+                                            DINEN61360:Value "false" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Input_Item8_latitude_DE
+Rover:RequiredCap_Input_Item8_latitude_DE rdf:type owl:NamedIndividual ,
+                                                    DINEN61360:Data_Element ;
+                                            DINEN61360:has_Instance_Description Rover:RequiredCap_Input_Item8_latitude_ID ;
+                                            DINEN61360:has_Type_Description Rover:latitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Input_Item8_latitude_ID
+Rover:RequiredCap_Input_Item8_latitude_ID rdf:type owl:NamedIndividual ,
+                                                    DINEN61360:Instance_Description ,
+                                                    DINEN61360:Real ;
+                                            DINEN61360:Expression_Goal "Actual_Value" ;
+                                            DINEN61360:Logic_Interpretation "=" ;
+                                            DINEN61360:Value "53.567060811833365" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Input_Item8_longitude_DE
+Rover:RequiredCap_Input_Item8_longitude_DE rdf:type owl:NamedIndividual ,
+                                                        DINEN61360:Data_Element ;
+                                            DINEN61360:has_Instance_Description Rover:RequiredCap_Input_Item8_longitude_ID ;
+                                            DINEN61360:has_Type_Description Rover:longitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Input_Item8_longitude_ID
+Rover:RequiredCap_Input_Item8_longitude_ID rdf:type owl:NamedIndividual ,
+                                                        DINEN61360:Instance_Description ,
+                                                        DINEN61360:Real ;
+                                            DINEN61360:Expression_Goal "Actual_Value" ;
+                                            DINEN61360:Logic_Interpretation "=" ;
+                                            DINEN61360:Value "10.112242266565111" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Output_Item8
+Rover:RequiredCap_Output_Item8 rdf:type owl:NamedIndividual ,
+                                            VDI3682:Product ;
+                                DINEN61360:has_Data_Element Rover:RequiredCap_Output_Item8_grabbed_DE ,
+                                                            Rover:RequiredCap_Output_Item8_latitude_DE ,
+                                                            Rover:RequiredCap_Output_Item8_longitude_DE ;
+                                VDI3682:isCharacterizedBy Rover:RequiredCap_Output_Item8_grabbed_ID ,
+                                                          Rover:RequiredCap_Output_Item8_latitude_ID ,
+                                                          Rover:RequiredCap_Output_Item8_longitude_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Output_Item8_grabbed_DE
+Rover:RequiredCap_Output_Item8_grabbed_DE rdf:type owl:NamedIndividual ,
+                                                    DINEN61360:Data_Element ;
+                                            DINEN61360:has_Instance_Description Rover:RequiredCap_Output_Item8_grabbed_ID ;
+                                            DINEN61360:has_Type_Description Rover:grabbed_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Output_Item8_grabbed_ID
+Rover:RequiredCap_Output_Item8_grabbed_ID rdf:type owl:NamedIndividual ,
+                                                    DINEN61360:Boolean ,
+                                                    DINEN61360:Instance_Description ;
+                                            DINEN61360:Expression_Goal "Requirement" ;
+                                            DINEN61360:Logic_Interpretation "=" ;
+                                            DINEN61360:Value "false" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Output_Item8_latitude_DE
+Rover:RequiredCap_Output_Item8_latitude_DE rdf:type owl:NamedIndividual ,
+                                                    DINEN61360:Data_Element ;
+                                            DINEN61360:has_Instance_Description Rover:RequiredCap_Output_Item8_latitude_ID ;
+                                            DINEN61360:has_Type_Description Rover:latitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Output_Item8_latitude_ID
+Rover:RequiredCap_Output_Item8_latitude_ID rdf:type owl:NamedIndividual ,
+                                                    DINEN61360:Real ,
+                                                    DINEN61360:Instance_Description ;
+                                            DINEN61360:Expression_Goal "Requirement" ;
+                                            DINEN61360:Logic_Interpretation "=" ;
+                                            DINEN61360:Value "53.56687976216757" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Output_Item8_longitude_DE
+Rover:RequiredCap_Output_Item8_longitude_DE rdf:type owl:NamedIndividual ,
+                                                    DINEN61360:Data_Element ;
+                                            DINEN61360:has_Instance_Description Rover:RequiredCap_Output_Item8_longitude_ID ;
+                                            DINEN61360:has_Type_Description Rover:longitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#RequiredCap_Output_Item8_longitude_ID
+Rover:RequiredCap_Output_Item8_longitude_ID rdf:type owl:NamedIndividual ,
+                                                    DINEN61360:Real ,
+                                                    DINEN61360:Instance_Description ;
+                                            DINEN61360:Expression_Goal "Requirement" ;
+                                            DINEN61360:Logic_Interpretation "=" ;
+                                            DINEN61360:Value "10.112298130989076" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7
+Rover:Rover7 rdf:type owl:NamedIndividual ,
+                CSS:Resource ;
+        DINEN61360:has_Data_Element Rover:Rover7_latitude_DE ,
+                            Rover:Rover7_longitude_DE ;
+        VDI3682:isCharacterizedBy Rover:Rover7_latitude_ID ,
+                            Rover:Rover7_longitude_ID ;
+        CSS:providesCapability Rover:Rover7_capDriveTo19 ,
+                            Rover:Rover7_capGrab34 ,
+                            Rover:Rover7_capDrop33 .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_latitude_DE
+Rover:Rover7_latitude_DE rdf:type owl:NamedIndividual ,
+                                    DINEN61360:Data_Element ;
+                            DINEN61360:has_Instance_Description Rover:Rover7_latitude_ID ,
+                                                                    Rover:Rover7_capDriveTo19_AssuranceInflat_latitude71_ID ,
+                                                                    Rover:Rover7_capDrop33_AssuranceInflat_latitude167_ID ;
+                            DINEN61360:has_Type_Description Rover:latitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_latitude_ID
+Rover:Rover7_latitude_ID rdf:type owl:NamedIndividual ,
+                                    openmath:Variable ,
+                                    DINEN61360:Instance_Description ,
+                                    DINEN61360:Real ;
+                            openmath:name "Rover7_latitude_ID" ;
+                            DINEN61360:Expression_Goal "Actual_Value" ;
+                            DINEN61360:Logic_Interpretation "=" ;
+                            DINEN61360:Value "53.56699987733581" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_longitude_DE
+Rover:Rover7_longitude_DE rdf:type owl:NamedIndividual ,
+                                    DINEN61360:Data_Element ;
+                            DINEN61360:has_Instance_Description Rover:Rover7_longitude_ID ,
+                                                                    Rover:Rover7_capDriveTo19_AssuranceInflong_longitude70_ID ,
+                                                                    Rover:Rover7_capDrop33_AssuranceInflong_longitude166_ID ;
+                            DINEN61360:has_Type_Description Rover:longitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_longitude_ID
+Rover:Rover7_longitude_ID rdf:type owl:NamedIndividual ,
+                                    openmath:Variable ,
+                                    DINEN61360:Instance_Description ,
+                                    DINEN61360:Real ;
+                            openmath:name "Rover7_longitude_ID" ;
+                            DINEN61360:Expression_Goal "Actual_Value" ;
+                            DINEN61360:Logic_Interpretation "=" ;
+                            DINEN61360:Value "10.11237544953392" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19
+Rover:Rover7_capDriveTo19 rdf:type owl:NamedIndividual ,
+                                    CaSk:ProvidedCapability ,
+                                    VDI3682:ProcessOperator ;
+                            VDI3682:hasInput Rover:Rover7_capDriveTo19_RequiredInflat ,
+                                                Rover:Rover7_capDriveTo19_RequiredInflong ;
+                            VDI3682:hasOutput Rover:Rover7_capDriveTo19_AssuranceInflat ,
+                                                Rover:Rover7_capDriveTo19_AssuranceInflong ;
+                            CSS:isRestrictedBy Rover:Rover7_capDriveTo19_Constraint_latitude71 ,
+                                                Rover:Rover7_capDriveTo19_Constraint_longitude70 ;
+                            CSS:requiresCapability Rover:Rover7_capDriveTo19 .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_AssuranceInflat
+Rover:Rover7_capDriveTo19_AssuranceInflat rdf:type owl:NamedIndividual ,
+                                                    VDI3682:Information ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capDriveTo19_AssuranceInflat_latitude71_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_AssuranceInflat_latitude71_ID
+Rover:Rover7_capDriveTo19_AssuranceInflat_latitude71_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            openmath:name "Rover7_capDriveTo19_AssuranceInflat_latitude71_ID" ;
+                                                            DINEN61360:Expression_Goal "Assurance" ;
+                                                            DINEN61360:Logic_Interpretation "=" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_AssuranceInflong
+Rover:Rover7_capDriveTo19_AssuranceInflong rdf:type owl:NamedIndividual ,
+                                                        VDI3682:Information ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capDriveTo19_AssuranceInflong_longitude70_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_AssuranceInflong_longitude70_ID
+Rover:Rover7_capDriveTo19_AssuranceInflong_longitude70_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            openmath:name "Rover7_capDriveTo19_AssuranceInflong_longitude70_ID" ;
+                                                            DINEN61360:Expression_Goal "Assurance" ;
+                                                            DINEN61360:Logic_Interpretation "=" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_RequiredInflat
+Rover:Rover7_capDriveTo19_RequiredInflat rdf:type owl:NamedIndividual ,
+                                                    VDI3682:Information ;
+                                            DINEN61360:has_Data_Element Rover:Rover7_capDriveTo19_RequiredInflat_latitude71_DE ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capDriveTo19_RequiredInflat_latitude71_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_RequiredInflat_latitude71_DE
+Rover:Rover7_capDriveTo19_RequiredInflat_latitude71_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capDriveTo19_RequiredInflat_latitude71_ID ;
+                                                        DINEN61360:has_Type_Description Rover:latitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_RequiredInflat_latitude71_ID
+Rover:Rover7_capDriveTo19_RequiredInflat_latitude71_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            openmath:name "Rover7_capDriveTo19_RequiredInflat_latitude71_ID" ;
+                                                            DINEN61360:Logic_Interpretation "=" ;
+                                                            DINEN61360:Expression_Goal "Variable" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_RequiredInflong
+Rover:Rover7_capDriveTo19_RequiredInflong rdf:type owl:NamedIndividual ,
+                                                    VDI3682:Information ;
+                                            DINEN61360:has_Data_Element Rover:Rover7_capDriveTo19_RequiredInflong_longitude70_DE ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capDriveTo19_RequiredInflong_longitude70_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_RequiredInflong_longitude70_DE
+Rover:Rover7_capDriveTo19_RequiredInflong_longitude70_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                            DINEN61360:has_Instance_Description Rover:Rover7_capDriveTo19_RequiredInflong_longitude70_ID ;
+                                                            DINEN61360:has_Type_Description Rover:longitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_RequiredInflong_longitude70_ID
+Rover:Rover7_capDriveTo19_RequiredInflong_longitude70_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            openmath:name "Rover7_capDriveTo19_RequiredInflong_longitude70_ID" ;
+                                                            DINEN61360:Logic_Interpretation "=" ;
+                                                            DINEN61360:Expression_Goal "Variable" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_Constraint_latitude71
+Rover:Rover7_capDriveTo19_Constraint_latitude71 rdf:type owl:NamedIndividual ,
+                                                            openmath:Application ,
+                                                            CSS:PropertyConstraint ;
+                                                    openmath:operator <http://www.openmath.org/cd/relation1#eq> ;
+                                                    openmath:arguments ( Rover:Rover7_capDriveTo19_AssuranceInflat_latitude71_ID Rover:Rover7_capDriveTo19_RequiredInflat_latitude71_ID ) ;
+                                                    CSS:references Rover:Rover7_capDriveTo19_AssuranceInflat_latitude71_ID ,
+                                                                    Rover:Rover7_capDriveTo19_RequiredInflat_latitude71_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDriveTo19_Constraint_longitude70
+Rover:Rover7_capDriveTo19_Constraint_longitude70 rdf:type owl:NamedIndividual ,
+                                                            openmath:Application ,
+                                                            CSS:PropertyConstraint ;
+                                                    openmath:operator <http://www.openmath.org/cd/relation1#eq> ;
+                                                    openmath:arguments ( Rover:Rover7_capDriveTo19_AssuranceInflong_longitude70_ID Rover:Rover7_capDriveTo19_RequiredInflong_longitude70_ID );
+                                                    CSS:references Rover:Rover7_capDriveTo19_AssuranceInflong_longitude70_ID ,
+                                                                    Rover:Rover7_capDriveTo19_RequiredInflong_longitude70_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34
+Rover:Rover7_capGrab34 rdf:type owl:NamedIndividual ,
+                                    CaSk:ProvidedCapability ,
+                                    VDI3682:ProcessOperator ;
+                        VDI3682:hasInput Rover:Rover7_capGrab34_RequiredProdItem ;
+                        VDI3682:hasOutput Rover:Rover7_capGrab34_AssuranceProdItem ;
+                        CSS:isRestrictedBy Rover:Rover7_capGrab34_Constraint_Input_latitude ,
+                                            Rover:Rover7_capGrab34_Constraint_Input_longitude ,
+                                            Rover:Rover7_capGrab34_Constraint_Output_latitude ,
+                                            Rover:Rover7_capGrab34_Constraint_Output_longitude ;
+                        CSS:requiresCapability Rover:Rover7_capGrab34 .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_AssuranceProdItem
+Rover:Rover7_capGrab34_AssuranceProdItem rdf:type owl:NamedIndividual ,
+                                                    VDI3682:Product ;
+                                            DINEN61360:has_Data_Element Rover:Rover7_capGrab34_AssuranceProdItem_grabbed162_DE ,
+                                                                                Rover:Rover7_capGrab34_AssuranceProdItem_latitude_DE ,
+                                                                                Rover:Rover7_capGrab34_AssuranceProdItem_longitude_DE ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capGrab34_AssuranceProdItem_grabbed162_ID ,
+                                                                        Rover:Rover7_capGrab34_AssuranceProdItem_latitude_ID ,
+                                                                        Rover:Rover7_capGrab34_AssuranceProdItem_longitude_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_AssuranceProdItem_grabbed162_DE
+Rover:Rover7_capGrab34_AssuranceProdItem_grabbed162_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capGrab34_AssuranceProdItem_grabbed162_ID ;
+                                                        DINEN61360:has_Type_Description Rover:grabbed_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_AssuranceProdItem_grabbed162_ID
+Rover:Rover7_capGrab34_AssuranceProdItem_grabbed162_ID rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Boolean ,
+                                                                    DINEN61360:Instance_Description ;
+                                                        DINEN61360:Expression_Goal "Assurance" ;
+                                                        DINEN61360:Logic_Interpretation "=" ;
+                                                        DINEN61360:Value "true" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_AssuranceProdItem_latitude_DE
+Rover:Rover7_capGrab34_AssuranceProdItem_latitude_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capGrab34_AssuranceProdItem_latitude_ID ;
+                                                        DINEN61360:has_Type_Description Rover:latitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_AssuranceProdItem_latitude_ID
+Rover:Rover7_capGrab34_AssuranceProdItem_latitude_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Real ,
+                                                                    DINEN61360:Instance_Description ;
+                                                        openmath:name "Rover7_capGrab34_AssuranceProdItem_latitude_ID" ;
+                                                        DINEN61360:Expression_Goal "Assurance" ;
+                                                        DINEN61360:Logic_Interpretation "=" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_AssuranceProdItem_longitude_DE
+Rover:Rover7_capGrab34_AssuranceProdItem_longitude_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capGrab34_AssuranceProdItem_longitude_ID ;
+                                                        DINEN61360:has_Type_Description Rover:longitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_AssuranceProdItem_longitude_ID
+Rover:Rover7_capGrab34_AssuranceProdItem_longitude_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Real ,
+                                                                    DINEN61360:Instance_Description ;
+                                                        openmath:name "Rover7_capGrab34_AssuranceProdItem_longitude_ID" ;
+                                                        DINEN61360:Expression_Goal "Assurance" ;
+                                                        DINEN61360:Logic_Interpretation "=" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_RequiredProdItem
+Rover:Rover7_capGrab34_RequiredProdItem rdf:type owl:NamedIndividual ,
+                                                    VDI3682:Product ;
+                                            DINEN61360:has_Data_Element Rover:Rover7_capGrab34_RequiredProdItem_grabbed162_DE ,
+                                                                            Rover:Rover7_capGrab34_RequiredProdItem_latitude_DE ,
+                                                                            Rover:Rover7_capGrab34_RequiredProdItem_longitude_DE ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capGrab34_RequiredProdItem_grabbed162_ID ,
+                                                                        Rover:Rover7_capGrab34_RequiredProdItem_latitude_ID ,
+                                                                        Rover:Rover7_capGrab34_RequiredProdItem_longitude_ID ,
+                                                                        Rover:Rover7_capGrab34_RequiredProdItem_Required_latitude_ID ,
+                                                                        Rover:Rover7_capGrab34_RequiredProdItem_Required_longitude_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_RequiredProdItem_grabbed162_DE
+Rover:Rover7_capGrab34_RequiredProdItem_grabbed162_DE rdf:type owl:NamedIndividual ,
+                                                                DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capGrab34_RequiredProdItem_grabbed162_ID ;
+                                                        DINEN61360:has_Type_Description Rover:grabbed_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_RequiredProdItem_grabbed162_ID
+Rover:Rover7_capGrab34_RequiredProdItem_grabbed162_ID rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Boolean ,
+                                                                    DINEN61360:Instance_Description ;
+                                                        DINEN61360:Expression_Goal "Requirement" ;
+                                                        DINEN61360:Logic_Interpretation "=" ;
+                                                        DINEN61360:Value "false" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_RequiredProdItem_latitude_DE
+Rover:Rover7_capGrab34_RequiredProdItem_latitude_DE rdf:type owl:NamedIndividual ,
+                                                                DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capGrab34_RequiredProdItem_latitude_ID ,
+                                                                                                Rover:Rover7_capGrab34_RequiredProdItem_Required_latitude_ID ;
+                                                        DINEN61360:has_Type_Description Rover:latitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_RequiredProdItem_latitude_ID
+Rover:Rover7_capGrab34_RequiredProdItem_latitude_ID rdf:type owl:NamedIndividual ,
+                                                                openmath:Variable ,
+                                                                DINEN61360:Instance_Description ,
+                                                                DINEN61360:Real ;
+                                                        openmath:name "Rover7_capGrab34_RequiredProdItem_latitude_ID" ;
+                                                        DINEN61360:Expression_Goal "Actual_Value" ;
+                                                        DINEN61360:Logic_Interpretation "=" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_RequiredProdItem_Required_latitude_ID
+Rover:Rover7_capGrab34_RequiredProdItem_Required_latitude_ID rdf:type owl:NamedIndividual ,
+                                                                        openmath:Variable ,
+                                                                        DINEN61360:Instance_Description ,
+                                                                        DINEN61360:Real ;
+                                                                openmath:name "Rover7_capGrab34_RequiredProdItem_Required_latitude_ID" ;
+                                                                DINEN61360:Expression_Goal "Requirement" ;
+                                                                DINEN61360:Logic_Interpretation "=" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_RequiredProdItem_longitude_DE
+Rover:Rover7_capGrab34_RequiredProdItem_longitude_DE rdf:type owl:NamedIndividual ,
+                                                                DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capGrab34_RequiredProdItem_longitude_ID ,
+                                                                                                Rover:Rover7_capGrab34_RequiredProdItem_Required_longitude_ID ;
+                                                        DINEN61360:has_Type_Description Rover:longitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_RequiredProdItem_longitude_ID
+Rover:Rover7_capGrab34_RequiredProdItem_longitude_ID rdf:type owl:NamedIndividual ,
+                                                                openmath:Variable ,
+                                                                DINEN61360:Instance_Description ,
+                                                                DINEN61360:Real ;
+                                                        openmath:name "Rover7_capGrab34_RequiredProdItem_longitude_ID" ;
+                                                        DINEN61360:Expression_Goal "Actual_Value" ;
+                                                        DINEN61360:Logic_Interpretation "=" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_RequiredProdItem_Required_longitude_ID
+Rover:Rover7_capGrab34_RequiredProdItem_Required_longitude_ID rdf:type owl:NamedIndividual ,
+                                                                        openmath:Variable ,
+                                                                        DINEN61360:Instance_Description ,
+                                                                        DINEN61360:Real ;
+                                                                openmath:name "Rover7_capGrab34_RequiredProdItem_Required_longitude_ID" ;
+                                                                DINEN61360:Expression_Goal "Requirement" ;
+                                                                DINEN61360:Logic_Interpretation "=" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_Constraint_Input_latitude
+Rover:Rover7_capGrab34_Constraint_Input_latitude rdf:type owl:NamedIndividual ,
+                                                        openmath:Application ,
+                                                        CSS:PropertyConstraint ;
+                                                        openmath:operator <http://www.openmath.org/cd/relation1#eq> ;
+                                                        openmath:arguments Rover:Rover7_capGrab34_Constraint_Input_latitude_ArgList ;
+                                                        CSS:references Rover:Rover7_latitude_ID ,
+                                                                        Rover:Rover7_capGrab34_RequiredProdItem_Required_latitude_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_Constraint_Input_latitude_ArgList
+Rover:Rover7_capGrab34_Constraint_Input_latitude_ArgList rdf:type owl:NamedIndividual ;
+                                                        rdf:first Rover:Rover7_latitude_ID ;
+                                                        rdf:rest ( Rover:Rover7_capGrab34_RequiredProdItem_Required_latitude_ID ) .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_Constraint_Output_latitude
+Rover:Rover7_capGrab34_Constraint_Output_latitude rdf:type owl:NamedIndividual ,
+                                                        openmath:Application ,
+                                                        CSS:PropertyConstraint ;
+                                                        openmath:operator <http://www.openmath.org/cd/relation1#eq> ;
+                                                        openmath:arguments Rover:Rover7_capGrab34_Constraint_Output_latitude_ArgList ;
+                                                        CSS:references Rover:Rover7_capGrab34_AssuranceProdItem_latitude_ID ,
+                                                                        Rover:Rover7_capGrab34_RequiredProdItem_latitude_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_Constraint_Output_latitude_ArgList
+Rover:Rover7_capGrab34_Constraint_Output_latitude_ArgList rdf:type owl:NamedIndividual ;
+                                                        rdf:first Rover:Rover7_capGrab34_RequiredProdItem_latitude_ID ;
+                                                        rdf:rest ( Rover:Rover7_capGrab34_AssuranceProdItem_latitude_ID ) .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_Constraint_Input_longitude
+Rover:Rover7_capGrab34_Constraint_Input_longitude rdf:type owl:NamedIndividual ,
+                                                        openmath:Application ,
+                                                        CSS:PropertyConstraint ;
+                                                        openmath:operator <http://www.openmath.org/cd/relation1#eq> ;
+                                                        openmath:arguments Rover:Rover7_capGrab34_Constraint_Input_longitude_ArgList ;
+                                                        CSS:references Rover:Rover7_longitude_ID ,
+                                                                        Rover:Rover7_capGrab34_RequiredProdItem_Required_longitude_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_Constraint_Input_longitude_ArgList
+Rover:Rover7_capGrab34_Constraint_Input_longitude_ArgList rdf:type owl:NamedIndividual ;
+                                                        rdf:first Rover:Rover7_longitude_ID ;
+                                                        rdf:rest ( Rover:Rover7_capGrab34_RequiredProdItem_Required_longitude_ID ) .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_Constraint_Output_longitude
+Rover:Rover7_capGrab34_Constraint_Output_longitude rdf:type owl:NamedIndividual ,
+                                                        openmath:Application ,
+                                                        CSS:PropertyConstraint ;
+                                                        openmath:operator <http://www.openmath.org/cd/relation1#eq> ;
+                                                        openmath:arguments Rover:Rover7_capGrab34_Constraint_Output_longitude_ArgList ;
+                                                        CSS:references Rover:Rover7_capGrab34_AssuranceProdItem_longitude_ID ,
+                                                                        Rover:Rover7_capGrab34_RequiredProdItem_longitude_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capGrab34_Constraint_Output_longitude_ArgList
+Rover:Rover7_capGrab34_Constraint_Output_longitude_ArgList rdf:type owl:NamedIndividual ;
+                                                        rdf:first Rover:Rover7_capGrab34_RequiredProdItem_longitude_ID ;
+                                                        rdf:rest ( Rover:Rover7_capGrab34_AssuranceProdItem_longitude_ID ) .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33
+Rover:Rover7_capDrop33 rdf:type owl:NamedIndividual ,
+                                    CaSk:ProvidedCapability ,
+                                    VDI3682:ProcessOperator ;
+                            VDI3682:hasInput Rover:Rover7_capDrop33_RequiredInflat ,
+                                                Rover:Rover7_capDrop33_RequiredInflong ,
+                                                Rover:Rover7_capDrop33_RequiredProdItem ;
+                            VDI3682:hasOutput Rover:Rover7_capDrop33_AssuranceInflat ,
+                                                Rover:Rover7_capDrop33_AssuranceInflong ,
+                                                Rover:Rover7_capDrop33_AssuranceProdItem ;
+                            CSS:isRestrictedBy Rover:Rover7_capDrop33_Constraint_latitude167 ,
+                                                Rover:Rover7_capDrop33_Constraint_Output_latitude ,
+                                                Rover:Rover7_capDrop33_Constraint_longitude166 ,
+                                                Rover:Rover7_capDrop33_Constraint_Output_longitude ;
+                            CSS:requiresCapability Rover:Rover7_capDrop33 .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_AssuranceInflat
+Rover:Rover7_capDrop33_AssuranceInflat rdf:type owl:NamedIndividual ,
+                                                    VDI3682:Information ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capDrop33_AssuranceInflat_latitude167_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_AssuranceInflat_latitude167_ID
+Rover:Rover7_capDrop33_AssuranceInflat_latitude167_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            openmath:name "Rover7_capDrop33_AssuranceInflat_latitude167_ID" ;
+                                                            DINEN61360:Expression_Goal "Assurance" ;
+                                                            DINEN61360:Logic_Interpretation "=" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_AssuranceInflong
+Rover:Rover7_capDrop33_AssuranceInflong rdf:type owl:NamedIndividual ,
+                                                        VDI3682:Information ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capDrop33_AssuranceInflong_longitude166_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_AssuranceInflong_longitude166_ID
+Rover:Rover7_capDrop33_AssuranceInflong_longitude166_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            openmath:name "Rover7_capDrop33_AssuranceInflong_longitude166_ID" ;
+                                                            DINEN61360:Expression_Goal "Assurance" ;
+                                                            DINEN61360:Logic_Interpretation "=" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_AssuranceProdItem
+Rover:Rover7_capDrop33_AssuranceProdItem rdf:type owl:NamedIndividual ,
+                                                    VDI3682:Product ;
+                                            DINEN61360:has_Data_Element Rover:Rover7_capDrop33_AssuranceProdItem_grabbed158_DE ,
+                                                                                Rover:Rover7_capDrop33_AssuranceProdItem_latitude_DE ,
+                                                                                Rover:Rover7_capDrop33_AssuranceProdItem_longitude_DE ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capDrop33_AssuranceProdItem_grabbed158_ID ,
+                                                                        Rover:Rover7_capDrop33_AssuranceProdItem_latitude_ID ,
+                                                                        Rover:Rover7_capDrop33_AssuranceProdItem_longitude_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_AssuranceProdItem_grabbed158_DE
+Rover:Rover7_capDrop33_AssuranceProdItem_grabbed158_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capDrop33_AssuranceProdItem_grabbed158_ID ;
+                                                        DINEN61360:has_Type_Description Rover:grabbed_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_AssuranceProdItem_grabbed158_ID
+Rover:Rover7_capDrop33_AssuranceProdItem_grabbed158_ID rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Boolean ,
+                                                                    DINEN61360:Instance_Description ;
+                                                        DINEN61360:Expression_Goal "Assurance" ;
+                                                        DINEN61360:Logic_Interpretation "=" ;
+                                                        DINEN61360:Value "false" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_AssuranceProdItem_latitude_DE
+Rover:Rover7_capDrop33_AssuranceProdItem_latitude_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capDrop33_AssuranceProdItem_latitude_ID ;
+                                                        DINEN61360:has_Type_Description Rover:latitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_AssuranceProdItem_latitude_ID
+Rover:Rover7_capDrop33_AssuranceProdItem_latitude_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            openmath:name "Rover7_capDrop33_AssuranceProdItem_latitude_ID" ;
+                                                            DINEN61360:Logic_Interpretation "=" ;
+                                                            DINEN61360:Expression_Goal "Assurance" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_AssuranceProdItem_longitude_DE
+Rover:Rover7_capDrop33_AssuranceProdItem_longitude_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capDrop33_AssuranceProdItem_longitude_ID ;
+                                                        DINEN61360:has_Type_Description Rover:longitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_AssuranceProdItem_longitude_ID
+Rover:Rover7_capDrop33_AssuranceProdItem_longitude_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            openmath:name "Rover7_capDrop33_AssuranceProdItem_longitude_ID" ;
+                                                            DINEN61360:Logic_Interpretation "=" ;
+                                                            DINEN61360:Expression_Goal "Assurance" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredInflat
+Rover:Rover7_capDrop33_RequiredInflat rdf:type owl:NamedIndividual ,
+                                                    VDI3682:Information ;
+                                            DINEN61360:has_Data_Element Rover:Rover7_capDrop33_RequiredInflat_latitude167_DE ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capDrop33_RequiredInflat_latitude167_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredInflat_latitude167_DE
+Rover:Rover7_capDrop33_RequiredInflat_latitude167_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capDrop33_RequiredInflat_latitude167_ID ;
+                                                        DINEN61360:has_Type_Description Rover:latitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredInflat_latitude167_ID
+Rover:Rover7_capDrop33_RequiredInflat_latitude167_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            openmath:name "Rover7_capDrop33_RequiredInflat_latitude167_ID" ;
+                                                            DINEN61360:Logic_Interpretation "=" ;
+                                                            DINEN61360:Expression_Goal "Variable" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredInflong
+Rover:Rover7_capDrop33_RequiredInflong rdf:type owl:NamedIndividual ,
+                                                    VDI3682:Information ;
+                                            DINEN61360:has_Data_Element Rover:Rover7_capDrop33_RequiredInflong_longitude166_DE ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capDrop33_RequiredInflong_longitude166_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredInflong_longitude166_DE
+Rover:Rover7_capDrop33_RequiredInflong_longitude166_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                            DINEN61360:has_Instance_Description Rover:Rover7_capDrop33_RequiredInflong_longitude166_ID ;
+                                                            DINEN61360:has_Type_Description Rover:longitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredInflong_longitude166_ID
+Rover:Rover7_capDrop33_RequiredInflong_longitude166_ID rdf:type owl:NamedIndividual ,
+                                                                    openmath:Variable ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            openmath:name "Rover7_capDrop33_RequiredInflong_longitude166_ID" ;
+                                                            DINEN61360:Logic_Interpretation "=" ;
+                                                            DINEN61360:Expression_Goal "Variable" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredProdItem
+Rover:Rover7_capDrop33_RequiredProdItem rdf:type owl:NamedIndividual ,
+                                                    VDI3682:Product ;
+                                            DINEN61360:has_Data_Element Rover:Rover7_capDrop33_RequiredProdItem_latitude167_DE ,
+                                                                                Rover:Rover7_capDrop33_RequiredProdItem_longitude166_DE ,
+                                                                                Rover:Rover7_capDrop33_RequiredProdItem_grabbed158_DE ;
+                                            VDI3682:isCharacterizedBy Rover:Rover7_capDrop33_RequiredProdItem_latitude167_ID ,
+                                                                        Rover:Rover7_capDrop33_RequiredProdItem_longitude166_ID ,
+                                                                        Rover:Rover7_capDrop33_RequiredProdItem_grabbed158_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredProdItem_latitude167_DE
+Rover:Rover7_capDrop33_RequiredProdItem_latitude167_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capDrop33_RequiredProdItem_latitude167_ID ;
+                                                        DINEN61360:has_Type_Description Rover:latitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredProdItem_latitude167_ID
+Rover:Rover7_capDrop33_RequiredProdItem_latitude167_ID rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            DINEN61360:Logic_Interpretation "=" ;
+                                                            DINEN61360:Expression_Goal "Actual_Value" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredProdItem_longitude166_DE
+Rover:Rover7_capDrop33_RequiredProdItem_longitude166_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capDrop33_RequiredProdItem_longitude166_ID ;
+                                                        DINEN61360:has_Type_Description Rover:longitude_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredProdItem_longitude166_ID
+Rover:Rover7_capDrop33_RequiredProdItem_longitude166_ID rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Real ;
+                                                            DINEN61360:Logic_Interpretation "=" ;
+                                                            DINEN61360:Expression_Goal "Actual_Value" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredProdItem_grabbed158_DE
+Rover:Rover7_capDrop33_RequiredProdItem_grabbed158_DE rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Data_Element ;
+                                                        DINEN61360:has_Instance_Description Rover:Rover7_capDrop33_RequiredProdItem_grabbed158_ID ;
+                                                        DINEN61360:has_Type_Description Rover:grabbed_TD .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_RequiredProdItem_grabbed158_ID
+Rover:Rover7_capDrop33_RequiredProdItem_grabbed158_ID rdf:type owl:NamedIndividual ,
+                                                                    DINEN61360:Instance_Description ,
+                                                                    DINEN61360:Boolean ;
+                                                            DINEN61360:Logic_Interpretation "=" ;
+                                                            DINEN61360:Expression_Goal "Requirement" ;
+                                                            DINEN61360:Value "true" .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_Constraint_Output_latitude
+Rover:Rover7_capDrop33_Constraint_Output_latitude rdf:type owl:NamedIndividual ,
+                                                            openmath:Application ,
+                                                            CSS:PropertyConstraint ;
+                                                    openmath:operator <http://www.openmath.org/cd/relation1#eq> ;
+                                                    openmath:arguments Rover:Rover7_capDrop33_Constraint_Output_latitude_ArgList ;
+                                                    CSS:references Rover:Rover7_capDrop33_AssuranceProdItem_latitude_ID ,
+                                                                    Rover:Rover7_capDrop33_RequiredInflat_latitude167_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_Constraint_Output_latitude_ArgList
+Rover:Rover7_capDrop33_Constraint_Output_latitude_ArgList rdf:type owl:NamedIndividual ;
+                                                            rdf:first Rover:Rover7_capDrop33_AssuranceProdItem_latitude_ID ;
+                                                            rdf:rest ( Rover:Rover7_capDrop33_RequiredInflat_latitude167_ID ) .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover:Rover7_capDrop33_Constraint_latitude167
+Rover:Rover7_capDrop33_Constraint_latitude167 rdf:type owl:NamedIndividual ,
+                                                            openmath:Application ,
+                                                            CSS:PropertyConstraint ;
+                                                    openmath:operator <http://www.openmath.org/cd/relation1#eq> ;
+                                                    openmath:arguments Rover:Rover7_capDrop33_Constraint_latitude167_ArgList ;
+                                                    CSS:references Rover:Rover7_capDrop33_AssuranceInflat_latitude167_ID ,
+                                                                    Rover:Rover7_capDrop33_RequiredInflat_latitude167_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover:Rover7_capDrop33_Constraint_latitude167_ArgList
+Rover:Rover7_capDrop33_Constraint_latitude167_ArgList rdf:type owl:NamedIndividual ;
+                                                            rdf:first Rover:Rover7_capDrop33_AssuranceInflat_latitude167_ID ;
+                                                            rdf:rest ( Rover:Rover7_capDrop33_RequiredInflat_latitude167_ID ) .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_Constraint_Output_longitude
+Rover:Rover7_capDrop33_Constraint_Output_longitude rdf:type owl:NamedIndividual ,
+                                                            openmath:Application ,
+                                                            CSS:PropertyConstraint ;
+                                                    openmath:operator <http://www.openmath.org/cd/relation1#eq> ;
+                                                    openmath:arguments Rover:Rover7_capDrop33_Constraint_Output_longitude_ArgList ;
+                                                    CSS:references Rover:Rover7_capDrop33_AssuranceProdItem_longitude_ID ,
+                                                                    Rover:Rover7_capDrop33_RequiredInflong_longitude166_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover7_capDrop33_Constraint_Output_longitude_ArgList
+Rover:Rover7_capDrop33_Constraint_Output_longitude_ArgList rdf:type owl:NamedIndividual ;
+                                                            rdf:first Rover:Rover7_capDrop33_AssuranceProdItem_longitude_ID ;
+                                                            rdf:rest ( Rover:Rover7_capDrop33_RequiredInflong_longitude166_ID ) .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover:Rover7_capDrop33_Constraint_longitude166
+Rover:Rover7_capDrop33_Constraint_longitude166 rdf:type owl:NamedIndividual ,
+                                                            openmath:Application ,
+                                                            CSS:PropertyConstraint ;
+                                                    openmath:operator <http://www.openmath.org/cd/relation1#eq> ;
+                                                    openmath:arguments Rover:Rover7_capDrop33_Constraint_longitude166_ArgList ;
+                                                    CSS:references Rover:Rover7_capDrop33_AssuranceInflong_longitude166_ID ,
+                                                                    Rover:Rover7_capDrop33_RequiredInflong_longitude166_ID .
+
+
+###  http://www.hsu-hh.de/aut/ontologies/riva/rover-complete#Rover:Rover7_capDrop33_Constraint_longitude166_ArgList
+Rover:Rover7_capDrop33_Constraint_longitude166_ArgList rdf:type owl:NamedIndividual ;
+                                                            rdf:first Rover:Rover7_capDrop33_AssuranceInflong_longitude166_ID ;
+                                                            rdf:rest ( Rover:Rover7_capDrop33_RequiredInflong_longitude166_ID ) .

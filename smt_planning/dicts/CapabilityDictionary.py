@@ -2,6 +2,7 @@ from typing import Dict, List, Set
 from z3 import Bool, Int, AstRef
 from smt_planning.dicts.PropertyDictionary import Property
 from enum import Enum
+from smt_planning.dicts.name_util import convert_iri_to_z3_variable, convert_z3_variable_to_iri
 
 class PropertyChange(Enum):
 	NoChange = 1
@@ -19,7 +20,8 @@ class CapabilityOccurrence:
 	def __init__(self, iri: str, happening: int):
 		self.iri = iri
 		self.happening = happening
-		z3_variable_name = iri + "_" + str(happening)
+		self.event = 0	# Definition: All capability occurrences happen at event 0
+		z3_variable_name = convert_iri_to_z3_variable(iri, happening, self.event)
 		self.z3_variable = Bool(z3_variable_name)
 
 '''
@@ -67,6 +69,13 @@ class Capability:
 				return occurrence
 		
 		return None
+	
+	def get_all_occurrences(self) -> List[CapabilityOccurrence]:
+		# Double list comprehension to flatten the double dict-structure of self.occurrences
+		occurrences = [occurrence for occurrence in self.occurrences.values()]
+		return occurrences
+
+
 
 class ConstraintInfo():
 	def __init__(self, cap: str, constraintIri: str):
@@ -75,45 +84,71 @@ class ConstraintInfo():
 
 class CapabilityDictionary:
 	def __init__(self):
-		self.capabilities: Dict[str, Capability] = {}
+		self.provided_capabilities: Dict[str, Capability] = {}
+		self.required_capabilities: Dict[str, Capability] = {}
 		self.input_capability_constraints: List[ConstraintInfo] = []
 		self.output_capability_constraints: List[ConstraintInfo] = []
 
 	def add_capability(self, iri: str, capability_type: str, input_properties: List[Property], output_properties: List[CapabilityPropertyInfluence]) -> None:
-		capability = Capability(iri, capability_type, input_properties, output_properties)
-		self.capabilities.setdefault(iri, capability)
+		if (capability_type == "http://www.w3id.org/hsu-aut/cask#ProvidedCapability"):
+			self.add_provided_capability(iri, input_properties, output_properties)
+		elif (capability_type == "http://www.w3id.org/hsu-aut/cask#RequiredCapability"):
+			self.add_required_capability(iri, input_properties, output_properties) 
+
+	def add_provided_capability(self, iri: str, input_properties: List[Property], output_properties: List[CapabilityPropertyInfluence]) -> None:
+		capability = Capability(iri,"http://www.w3id.org/hsu-aut/cask#ProvidedCapability", input_properties, output_properties)
+		self.provided_capabilities.setdefault(iri, capability)
+
+	def add_required_capability(self, iri: str, input_properties: List[Property], output_properties: List[CapabilityPropertyInfluence]) -> None:
+		capability = Capability(iri,"http://www.w3id.org/hsu-aut/cask#RequiredCapability", input_properties, output_properties)
+		self.required_capabilities.setdefault(iri, capability)
 
 	def add_capability_occurrences(self, happenings: int) -> None:
-		for capability in self.capabilities.values():
+		capabilities = {**self.provided_capabilities, **self.required_capabilities}
+		for capability in capabilities.values():
 			for happening in range(happenings):
 				capability_occurrence = CapabilityOccurrence(capability.iri, happening)
 				capability.add_occurrence(capability_occurrence)
 
+	def get_provided_capability(self, iri: str)-> Capability:
+		if (not iri in self.provided_capabilities):
+			raise KeyError(f"There is no provided capability with key {iri}.")
+		return self.provided_capabilities[iri]
+
 	def get_capability(self, iri:str) -> Capability:
-		if (not iri in self.capabilities):
+		capabilities = {**self.provided_capabilities, **self.required_capabilities}
+		if (not iri in capabilities):
 			raise KeyError(f"There is no capability with key {iri}.")
-		return self.capabilities[iri]
+		return capabilities[iri]
 
 	def get_capability_occurrence(self, iri: str, happening:int) -> CapabilityOccurrence:
 		capability = self.get_capability(iri)
 		return capability.occurrences[happening]
 	
-	def get_capability_from_z3_variable(self, z3_variable: AstRef) -> CapabilityOccurrence:
-		for capability in self.capabilities.values():
-			capability_occurrence = capability.get_occurrence_by_z3_variable(str(z3_variable))
-			if capability_occurrence is not None:
-				return capability_occurrence
-			
-		raise KeyError(f"There is not a single capability occurrence for the z3_variable {z3_variable}")
+	def get_all_capability_occurrences(self) -> List[CapabilityOccurrence]:	
+		'''
+		Return all currently stored capability occurrences
+		'''
+		all_capabilities = {**self.required_capabilities, **self.provided_capabilities}
+		all_occurrences: List[CapabilityOccurrence] = []
+		for capability in all_capabilities.values():
+			occurrences = capability.get_all_occurrences()
+			all_occurrences.extend(occurrences)
+		
+		return all_occurrences
 	
+	def get_capability_from_z3_variable(self, z3_variable: AstRef) -> CapabilityOccurrence:
+		capabilities = {**self.provided_capabilities, **self.required_capabilities}
+		z3_var_components = convert_z3_variable_to_iri(str(z3_variable))
+		capability = capabilities.get(z3_var_components.iri)
+		if capability is None:
+			raise KeyError(f"There is no capability for the z3_variable {z3_variable}")
+
+		capability_occurrence = capability.occurrences[z3_var_components.happening]
+		return capability_occurrence
+
 	def add_capability_constraint(self, cap: str, constraintIri: str, input: bool = False) -> None:
 		if input: 
 			self.input_capability_constraints.append(ConstraintInfo(cap, constraintIri))
 		else: 
 			self.output_capability_constraints.append(ConstraintInfo(cap, constraintIri))
-
-	def set_input_capability_constraints(self, input_constraints: List[ConstraintInfo]) -> None:
-		self.input_capability_constraints = input_constraints
-		
-	def set_output_capability_constraints(self, output_constraints: List[ConstraintInfo]) -> None:
-		self.output_capability_constraints = output_constraints

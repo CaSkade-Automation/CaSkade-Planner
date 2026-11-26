@@ -1,6 +1,6 @@
 import os
 from smt_planning.smt.cask_to_smt import CaskadePlanner
-from smt_planning.smt.planning_result import PlanningResult
+from smt_planning.planning_result import PlanningResult
 
 """
 This test checks if the planner can correctly plan missions for a drone with a geofence. 

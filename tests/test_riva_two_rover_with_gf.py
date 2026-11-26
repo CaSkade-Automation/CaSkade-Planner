@@ -1,6 +1,6 @@
 import os
 from smt_planning.smt.cask_to_smt import CaskadePlanner
-from smt_planning.smt.planning_result import PlanningResult
+from smt_planning.planning_result import PlanningResult
 
 """
 This test checks if the planner can create a plan for the riva_two_rover_with_gf_and_current_holder.ttl ontology file. 

@@ -1,6 +1,6 @@
 import os
 from smt_planning.smt.cask_to_smt import CaskadePlanner
-from smt_planning.smt.planning_result import PlanningResult, PlanningResultType
+from smt_planning.planning_result import PlanningResult, PlanningResultType
 
 """
 This test checks if the planner can correctly plan missions for a rover with a geofence. 

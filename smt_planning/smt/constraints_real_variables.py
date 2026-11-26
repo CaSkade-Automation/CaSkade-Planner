@@ -2,14 +2,14 @@ from z3 import Implies, Not, And
 from typing import List
 
 from smt_planning.smt.StateHandler import StateHandler
+from smt_planning.dicts.PropertyDictionary import Property
 from smt_planning.dicts.CapabilityDictionary import Capability
 from smt_planning.smt.property_links import get_related_properties
 from smt_planning.smt.capability_links import get_related_capabilities
 
-def get_variable_constraints(happenings: int, event_bound: int, required_capability_iri) -> List:
+def get_variable_constraints(happenings: int, event_bound: int) -> List:
 
 	stateHandler = StateHandler()
-	graph = stateHandler.get_graph()
 	property_dictionary = stateHandler.get_property_dictionary()
 	capability_dictionary = stateHandler.get_capability_dictionary()
 	
@@ -20,7 +20,7 @@ def get_variable_constraints(happenings: int, event_bound: int, required_capabil
 		
 		# Get all capabilities directly or indirectly influencing current property
 		property_capability_iris = original_property.capability_iris
-		capabilities = [capability_dictionary.get_capability(capabilit_iri) for capabilit_iri in property_capability_iris]
+		capabilities = [capability_dictionary.get_provided_capability(capabilit_iri) for capabilit_iri in property_capability_iris]
 		
 		related_capabilities: List[Capability] = []
 		for capability_iri in property_capability_iris:
@@ -30,14 +30,16 @@ def get_variable_constraints(happenings: int, event_bound: int, required_capabil
 		all_capabilities = [*capabilities, *related_capabilities]
 		
 		# Get all properties (this one and its related ones)
-		related_properties = get_related_properties(original_property.iri, required_capability_iri)
+		related_properties = get_related_properties(original_property.iri)
 		all_properties = [original_property, *related_properties]
 
 		all_capabilities_with_numeric_influence: List[Capability] = []
 		for capability in all_capabilities:
 			for property in all_properties:
-				if capability.has_effect_on_property(property):
+				if capability.has_effect_on_property(property) or has_effect_on_related_prop_in_same_cap(property, capability):
+					# If there is an influence, we add the cap and continue to the next
 					all_capabilities_with_numeric_influence.append(capability)
+					break	
 
 
 		for happening in range(happenings):
@@ -46,7 +48,13 @@ def get_variable_constraints(happenings: int, event_bound: int, required_capabil
 			all_capability_variables_with_numeric_influence = [cap.occurrences[happening].z3_variable for cap in all_capabilities_with_numeric_influence]
 			caps_constraint = [Not(cap) for cap in all_capability_variables_with_numeric_influence]                
 			constraint = Implies(And(*caps_constraint), prop_end == prop_start)
-
 			constraints.append(constraint)
 
 	return constraints
+
+
+
+def has_effect_on_related_prop_in_same_cap(property: Property, capability: Capability):
+	if str(property.iri) == 'http://www.hsu-hh.de/aut/ontologies/lab/MPS500/Transport#ProductAtStartStation_StationID_DE' and str(capability.iri) == 'http://www.hsu-hh.de/aut/ontologies/lab/MPS500/Transport#Transport':
+		return True
+	return False

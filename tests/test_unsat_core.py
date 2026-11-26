@@ -3,7 +3,7 @@ import os
 from z3 import Real
 
 from smt_planning.smt.cask_to_smt import CaskadePlanner
-from smt_planning.smt.planning_result import PlanningResultType
+from smt_planning.planning_result import PlanningResultType
 from smt_planning.smt.unsat_core import find_minimal_unsat_core
 
 """

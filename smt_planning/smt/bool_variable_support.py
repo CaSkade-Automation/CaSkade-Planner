@@ -2,9 +2,13 @@ from typing import List
 from z3 import Implies, Not
 
 from smt_planning.smt.StateHandler import StateHandler
-from smt_planning.dicts.PropertyDictionary import PropertyDictionary
 
 def getPropositionSupports(happenings: int, event_bound: int) -> List:
+	'''
+	Proposition support takes care of continuing property values. 
+	It ensures that property values cannot randomly change from one happending to the next one.
+	'''
+	
 	supports = []
 	property_dictionary = StateHandler().get_property_dictionary()
 	properties = property_dictionary.provided_properties.values()

@@ -1,4 +1,5 @@
 from typing import Dict, List
+from smt_planning.dicts.name_util import convert_iri_to_z3_variable
 from z3 import Int
 from smt_planning.dicts.CapabilityDictionary import Capability
 
@@ -8,7 +9,7 @@ class ResourceOccurence:
 		self.iri = iri
 		self.happening = happening
 		self.event = event
-		z3_variable_name = iri + "_" + str(happening) + "_" + str(event)
+		z3_variable_name = convert_iri_to_z3_variable(iri, happening, event)
 		self.z3_variable = Int(z3_variable_name)
 
 class Resource: 
