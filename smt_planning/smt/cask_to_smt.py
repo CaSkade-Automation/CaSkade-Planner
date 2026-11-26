@@ -183,7 +183,10 @@ class CaskadePlanner:
 			# Add constraints
 			constraints = capability_constraints_smt(happenings, event_bound)
 			temp_solver.from_string("\n".join([*declarations, *constraints]))
-			self.add_assertions(solver, named_assertions, "capability_constraints", list(temp_solver.assertions()))
+			capability_constraints = list(temp_solver.assertions())
+			if len(capability_constraints) != len(constraints):
+				raise RuntimeError(f"Expected {len(constraints)} capability constraints after parsing, but found {len(capability_constraints)}.")
+			self.add_assertions(solver, named_assertions, "capability_constraints", capability_constraints)
 
 			self.add_comment(solver, "Start of constants")
 			constant_expressions = fix_constants(property_dictionary, capability_dictionary, happenings, event_bound)

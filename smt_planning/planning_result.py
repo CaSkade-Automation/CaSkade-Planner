@@ -217,7 +217,7 @@ class PlanningResult:
 
 		dict = {
 			"timeCreated": str(self.time_created),
-			"resultType": str(self.result_type),
+			"resultType": self.result_type.value,
 			"unsatCore": unsat_core_json,
 			"plan": plan_dict
 		}
