@@ -13,12 +13,10 @@ class ResourceOccurence:
 		self.z3_variable = Int(z3_variable_name)
 
 class Resource: 
-	id: int = 0
-	def __init__(self, iri: str, capabilities: List[Capability]) -> None:
+	def __init__(self, iri: str, id: int, capabilities: List[Capability]) -> None:
 		self.iri = iri
-		#self.z3_variable = Int(iri)
-		Resource.id += 1
-		self.id = Resource.id
+		# ID is used as value of properties that refer to a resource, e.g. the holder of an item. 0 stands for no resource
+		self.id = id
 		self.occurrences: Dict[int, Dict[int, ResourceOccurence]] = {}
 		self.capabilities = capabilities
 
@@ -43,8 +41,8 @@ class ResourceDictionary:
 		self.resources: Dict[str, Resource] = {}
 
 	def add_resource(self, iri: str, capabilities: List[Capability]) -> None:
-		resource = Resource(iri, capabilities)
-		self.resources.setdefault(iri, resource)
+		if iri not in self.resources:
+			self.resources[iri] = Resource(iri, len(self.resources) + 1, capabilities)
 	
 	def get_resource(self, iri: str) -> Resource:
 		if (not iri in self.resources):

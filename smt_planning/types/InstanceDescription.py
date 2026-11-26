@@ -19,13 +19,14 @@ class InstanceDescription:
 			return NotImplemented
 		return (
 			self.iri == other.iri and
+			self.cap_iri == other.cap_iri and
 			self.expr_goal == other.expr_goal and
 			self.logical_interpretation == other.logical_interpretation and
 			self.value == other.value
 		)
     
 	def __hash__(self):
-		return hash((self.iri, self.expr_goal, self.logical_interpretation, self.value))
+		return hash((self.iri, self.cap_iri, self.expr_goal, self.logical_interpretation, self.value))
 
 
 # InstanceDescription of a DataElement with DINEN61360:Expression_Goal "Requirement"
