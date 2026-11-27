@@ -2,7 +2,6 @@ from z3 import Implies, Not, And
 from typing import List
 
 from smt_planning.smt.StateHandler import StateHandler
-from smt_planning.dicts.PropertyDictionary import Property
 from smt_planning.dicts.CapabilityDictionary import Capability
 from smt_planning.smt.property_links import get_related_properties
 from smt_planning.smt.capability_links import get_related_capabilities
@@ -36,7 +35,7 @@ def get_variable_constraints(happenings: int, event_bound: int) -> List:
 		all_capabilities_with_numeric_influence: List[Capability] = []
 		for capability in all_capabilities:
 			for property in all_properties:
-				if capability.has_effect_on_property(property) or has_effect_on_related_prop_in_same_cap(property, capability):
+				if capability.has_effect_on_property(property):
 					# If there is an influence, we add the cap and continue to the next
 					all_capabilities_with_numeric_influence.append(capability)
 					break	
@@ -51,10 +50,3 @@ def get_variable_constraints(happenings: int, event_bound: int) -> List:
 			constraints.append(constraint)
 
 	return constraints
-
-
-
-def has_effect_on_related_prop_in_same_cap(property: Property, capability: Capability):
-	if str(property.iri) == 'http://www.hsu-hh.de/aut/ontologies/lab/MPS500/Transport#ProductAtStartStation_StationID_DE' and str(capability.iri) == 'http://www.hsu-hh.de/aut/ontologies/lab/MPS500/Transport#Transport':
-		return True
-	return False

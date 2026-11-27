@@ -27,7 +27,6 @@ from smt_planning.smt.real_variable_contin_change import get_real_variable_conti
 from smt_planning.smt.robots_same_position import robot_positions_smt
 from smt_planning.smt.capability_mutexes import get_capability_mutexes
 from smt_planning.smt.geofence import geofence_smt
-from smt_planning.smt.fix_constants import fix_constants
 from smt_planning.smt.bind_floating_vars import bind_floating_variables
 from smt_planning.smt.unsat_core import find_minimal_unsat_core
 
@@ -187,10 +186,6 @@ class CaskadePlanner:
 			if len(capability_constraints) != len(constraints):
 				raise RuntimeError(f"Expected {len(constraints)} capability constraints after parsing, but found {len(capability_constraints)}.")
 			self.add_assertions(solver, named_assertions, "capability_constraints", capability_constraints)
-
-			self.add_comment(solver, "Start of constants")
-			constant_expressions = fix_constants(property_dictionary, capability_dictionary, happenings, event_bound)
-			self.add_assertions(solver, named_assertions, "constants", constant_expressions)
 
 			self.add_comment(solver, "Start of floating variable bindings")
 			binding_expressions = bind_floating_variables()

@@ -160,12 +160,6 @@ class _PropertyPairCache:
 			# Get the super class that is one of the subclasses of VDI3682:State			
 			?fpbSubType_a rdfs:subClassOf* ?fpbType.
 			?fpbSubType_b rdfs:subClassOf* ?fpbType.
-
-			# TODO: Properly filter out constants
-			FILTER(!CONTAINS(STR(?de_a), "Module_StationID"))
-			FILTER(!CONTAINS(STR(?de_b), "Module_StationID"))
-			FILTER(!CONTAINS(STR(?de_a), "Slide"))
-			FILTER(!CONTAINS(STR(?de_b), "Slide"))
 		}
 		"""
 		query_handler = StateHandler().get_query_handler()
@@ -239,12 +233,8 @@ class _PropertyPairCache:
 		same_type = self.same_type_description(binding, other_binding)
 		if not same_type: return False
 		
-		# b1) They have to belong to different capabilities.
+		# b) They have to belong to different capabilities.
 		different_cap = self.different_capability(str(binding.get(CAP)), str(other_binding.get(CAP)))
-
-		# b2) Or they have to belong to the same capability, but there must not be a explicit relation
-		same_cap = not different_cap
-		no_relation_in_same_cap = not self.relation_in_same_cap(binding, other_binding)
 
 		# c1) They either have to have the same subtype. We then can assume that properties of a should be related to the props of b
 		subtype_match = self.subtype_matches(binding, other_binding)
@@ -252,20 +242,11 @@ class _PropertyPairCache:
 		# c2) Or one of both is a VDI3682:Product. We assume that abstract products take all properties
 		one_is_abstract = self.one_is_abstract_state(binding, other_binding)
 
-		return (different_cap or (same_cap and no_relation_in_same_cap)) and same_type and (subtype_match or one_is_abstract)
-		# return different_cap and same_type and (subtype_match or one_is_abstract)
+		return different_cap and same_type and (subtype_match or one_is_abstract)
 
 	def different_capability(self, cap_iri: str, other_cap_iri: str) -> bool:
 		# Checks wheter two result bindings belong to different capabilities
 		return (cap_iri != other_cap_iri)
-
-	def relation_in_same_cap(self, binding: Mapping[Variable, Identifier], other_binding: Mapping[Variable, Identifier]) -> bool:
-		# TODO: Add proper check. Currently just for testing purposes. 
-		opt_a = (str(binding.get(DE) == 'http://www.hsu-hh.de/aut/ontologies/lab/MPS500/Transport#ProductAtTargetStation_StationID_DE') and str(other_binding.get(DE)) == 'http://www.hsu-hh.de/aut/ontologies/lab/MPS500/Transport#ProductAtStartStation_StationID_DE')
-		opt_b = (str(other_binding.get(DE) == 'http://www.hsu-hh.de/aut/ontologies/lab/MPS500/Transport#ProductAtTargetStation_StationID_DE') and str(binding.get(DE)) == 'http://www.hsu-hh.de/aut/ontologies/lab/MPS500/Transport#ProductAtStartStation_StationID_DE')
-		# if (opt_a or opt_b):
-		# 	return False
-		return True
 
 	def same_type_description(self, binding: Mapping[Variable, Identifier], other_binding: Mapping[Variable, Identifier]) -> bool:
 		# Checks whether two result bindings refer to the same type description
